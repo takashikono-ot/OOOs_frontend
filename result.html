@@ -12,20 +12,30 @@
       position: relative;    /* 追加：子要素の絶対配置を可能にする */
     }
     h1 { text-align:center; margin-bottom:1em; }
-    .result { text-align:center; }
-    .score-breakdown { margin: 1em 0; font-size: 1.1em; }
+    .result { text-align:center; display: none; }  /* 初期は非表示 */
+    .score-breakdown { margin: 1em 0; font-size: 1.1em; display: none; }
     .back { margin-top:2em; text-align:center; }
     .back a { color:#26466d; text-decoration:none; font-weight:bold; }
-    #chart-container { max-width: 500px; margin: 1em auto; }
+    #chart-container { max-width: 500px; margin: 1em auto; display: none; }
 
-    /* 追加部分：オーズくん画像のスタイル */
+    /* オーズくん画像のスタイル */
     .ooos-kun {
       position: absolute;
-      bottom: 10px;   /* 下から10px */
-      right: 10px;    /* 右から10px */
-      width: 120px;   /* お好みでサイズ調整 */
-      pointer-events: none; /* クリックを透過 */
-      opacity: 0.8;   /* 透け感をお好みで */
+      bottom: 10px;
+      right: 10px;
+      width: 120px;
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    /* Oローディングアニメ用 */
+    #roman-loader {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 0.2em;
+      color: #26466d;
+      text-align: center;
+      margin: 2em auto;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -33,7 +43,11 @@
 <body>
   <h1>あなたの潜在ランク</h1>
 
-  <div class="result" id="status">読み込み中…</div>
+  <!-- ローディングアニメ -->
+  <div id="roman-loader">O</div>
+
+  <!-- 結果表示エリア -->
+  <div class="result" id="status"></div>
   <!-- カテゴリごとの点数表示 -->
   <div class="score-breakdown" id="breakdown"></div>
 
@@ -43,16 +57,24 @@
 
   <div class="back"><a href="index.html">&larr; 診断に戻る</a></div>
 
-  <!-- 追加：オーズくん背景透過画像 -->
+  <!-- オーズくん背景透過画像 -->
   <img src="オーズくん背景透過.png" alt="オーズくん" class="ooos-kun">
 
   <script>
+    // Oローディングアニメ制御
+    const loader = document.getElementById('roman-loader');
+    const maxCount = 5;
+    let count = 1;
+    const intervalId = setInterval(() => {
+      count = count < maxCount ? count + 1 : 1;
+      loader.textContent = 'O'.repeat(count);
+    }, 400);
+
     (async () => {
       const statusEl = document.getElementById("status");
       const breakdownEl = document.getElementById("breakdown");
+      const chartContainer = document.getElementById("chart-container");
       const ctx = document.getElementById("prob-chart").getContext("2d");
-
-      statusEl.textContent = "リクエスト中…";
 
       try {
         // 回答配列の取得
@@ -68,15 +90,23 @@
         const total = ocp + ofp + obp;
 
         // サーバー呼び出し
-        const payload = { responses };
         const res = await fetch("https://ooos-backend.onrender.com/predict", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+          body: JSON.stringify({ responses })
         });
         const txt = await res.text();
         if (!res.ok) throw new Error(`HTTP ${res.status}: ${txt}`);
         const json = JSON.parse(txt);
+
+        // ローディング停止＆非表示
+        clearInterval(intervalId);
+        loader.style.display = 'none';
+
+        // 結果エリアを表示
+        statusEl.style.display = 'block';
+        breakdownEl.style.display = 'block';
+        chartContainer.style.display = 'block';
 
         // テキスト表示
         statusEl.innerHTML =
@@ -121,6 +151,9 @@
 
       } catch (err) {
         console.error("エラー詳細:", err);
+        clearInterval(intervalId);
+        loader.style.display = 'none';
+        statusEl.style.display = 'block';
         statusEl.textContent = "サーバーエラーが発生しました。コンソールをご確認ください。";
       }
     })();

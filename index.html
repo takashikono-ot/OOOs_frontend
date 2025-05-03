@@ -986,42 +986,41 @@
   </label>
 </div>
 
-
   </form>
 
 <!-- index.html -->
 
-  <!-- 省略: 質問のフォームとボタン -->
-
-  <button id="submit" class="btn">診断スタート</button>
+<button id="submit" class="btn">診断スタート</button>
 
   <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("ooo-form");
-    const submitBtn = document.getElementById("submit");
-    const resultEl  = document.getElementById("result");
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("ooo-form");
+      const submitBtn = document.getElementById("submit");
 
-    // …（デフォルトチェックの処理）…
-
-    submitBtn.addEventListener("click", async () => {
-      // ★ここが回答を集める部分です★
-      const data = [];
+      // （オプション）デフォルトで「１」にチェックを入れる処理
       for (let i = 1; i <= 42; i++) {
-        const radio = form.querySelector(`input[name="q${i}"]:checked`);
-        if (!radio) {
-          alert(`設問${i}が未選択です。全て回答してください。`);
-          return;
-        }
-        data.push(parseInt(radio.value, 10));
+        const first = form.querySelector(`input[name="q${i}"][value="1"]`);
+        if (first) first.checked = true;
       }
 
-      // そしてこの data を payload に詰めて fetch
-      const payload = { responses: data };
-      // …fetch のコード…
-    });
-  });
-</script>
+      submitBtn.addEventListener("click", () => {
+        const data = [];
+        for (let i = 1; i <= 42; i++) {
+          const radio = form.querySelector(`input[name="q${i}"]:checked`);
+          if (!radio) {
+            alert(`設問${i}が未選択です。全て回答してください。`);
+            return;
+          }
+          data.push(parseInt(radio.value, 10));
+        }
 
+        // ここで sessionStorage に保存
+        sessionStorage.setItem("ooo_responses", JSON.stringify(data));
+        // result.html に遷移
+        window.location.href = "result.html";
+      });
+    });
+  </script>
 </body>
 </html>
 

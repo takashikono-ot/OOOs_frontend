@@ -988,16 +988,15 @@
 
   </form>
 
-<!-- index.html -->
-
-<button id="submit" class="btn">診断スタート</button>
+ <button id="submit" class="btn">診断スタート</button>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    // 即時関数で即実行
+    (function() {
       const form = document.getElementById("ooo-form");
       const submitBtn = document.getElementById("submit");
 
-      // （オプション）デフォルトで「１」にチェックを入れる処理
+      // デフォルトで「１」をチェック
       for (let i = 1; i <= 42; i++) {
         const first = form.querySelector(`input[name="q${i}"][value="1"]`);
         if (first) first.checked = true;
@@ -1014,13 +1013,10 @@
           data.push(parseInt(radio.value, 10));
         }
 
-        // ここで sessionStorage に保存
         sessionStorage.setItem("ooo_responses", JSON.stringify(data));
-        // result.html に遷移
         window.location.href = "result.html";
       });
-    });
+    })();
   </script>
 </body>
 </html>
-

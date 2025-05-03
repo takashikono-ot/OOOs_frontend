@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>診断結果</title>
+  <style>
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; max-width:600px; margin:auto; padding:20px; }
+    h1 { text-align:center; margin-bottom:1em; }
+    .result { white-space: pre-wrap; font-size:1.2em; text-align:center; }
+    .back { margin-top:2em; text-align:center; }
+    .back a { color:#26466d; text-decoration:none; font-weight:bold; }
+  </style>
+</head>
+<body>
+  <h1>あなたの潜在ランク</h1>
+  <div id="result" class="result">読み込み中…</div>
+  <div class="back"><a href="index.html">&larr; 診断に戻る</a></div>
+
+  <script>
+    (async () => {
+      // 1. 保存された回答データを取り出す
+      const raw = sessionStorage.getItem("ooo_responses");
+      if (!raw) {
+        document.getElementById("result").textContent = "回答データが見つかりません。";
+        return;
+      }
+      const data = JSON.parse(raw);
+
+      try {
+        // 2. バックエンドに POST リクエスト
+        const res = await fetch("https://<あなたのバックエンドドメイン>/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ responses: data })
+        });
+        if (!res.ok) throw new Error(`HTTP エラー: ${res.status}`);
+        const json = await res.json();
+
+        // 3. 結果を表示
+        document.getElementById("result").textContent =
+          `推定ランク：${json.estimated_rank}\n確率：${json.rank_probs.map(p => p.toFixed(2)).join(", ")}`;
+      } catch (err) {
+        console.error(err);
+        document.getElementById("result").textContent = "サーバーエラーが発生しました。";
+      }
+    })();
+  </script>
+</body>
+</html>

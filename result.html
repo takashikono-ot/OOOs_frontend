@@ -4,13 +4,29 @@
   <meta charset="UTF-8">
   <title>診断結果</title>
   <style>
-    body { font-family: 'M PLUS Rounded 1c', sans-serif; max-width:600px; margin:auto; padding:20px; }
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      max-width:600px;
+      margin:auto;
+      padding:20px;
+      position: relative;    /* 追加：子要素の絶対配置を可能にする */
+    }
     h1 { text-align:center; margin-bottom:1em; }
     .result { text-align:center; }
     .score-breakdown { margin: 1em 0; font-size: 1.1em; }
     .back { margin-top:2em; text-align:center; }
     .back a { color:#26466d; text-decoration:none; font-weight:bold; }
     #chart-container { max-width: 500px; margin: 1em auto; }
+
+    /* 追加部分：オーズくん画像のスタイル */
+    .ooos-kun {
+      position: absolute;
+      bottom: 10px;   /* 下から10px */
+      right: 10px;    /* 右から10px */
+      width: 120px;   /* お好みでサイズ調整 */
+      pointer-events: none; /* クリックを透過 */
+      opacity: 0.8;   /* 透け感をお好みで */
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -26,6 +42,9 @@
   </div>
 
   <div class="back"><a href="index.html">&larr; 診断に戻る</a></div>
+
+  <!-- 追加：オーズくん背景透過画像 -->
+  <img src="オーズくん背景透過.png" alt="オーズくん" class="ooos-kun">
 
   <script>
     (async () => {

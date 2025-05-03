@@ -929,11 +929,11 @@
         data.push(parseInt(v));
       }
       // API呼び出し（URLは要置換）
-      const res = await fetch("https://<あなたの-backend-URL>/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ responses: data })
-      });
+      const res = await fetch("https://<あなたのサービス名>.onrender.com/predict", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ responses: data })
+    });
       const json = await res.json();
       // 結果表示
       document.getElementById("result").textContent =

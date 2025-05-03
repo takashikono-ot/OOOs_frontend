@@ -990,24 +990,33 @@
   </form>
 
 <!-- index.html -->
-…
+
   <button type="button" id="submit" class="btn">診断スタート</button>
-…
+
 <script>
-  const form = document.getElementById("ooo-form");
-  document.getElementById("submit").addEventListener("click", () => {
-    const data = [];
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("ooo-form");
+
+    // 各設問のデフォルトで「１」にチェック
     for (let i = 1; i <= 42; i++) {
-      const radio = form.querySelector(`input[name="q${i}"]:checked`);
-      if (!radio) {
-        alert("チェックされていない箇所があります。");
-        return;
-      }
-      data.push(parseInt(radio.value));
+      const firstOption = form.querySelector(`input[name="q${i}"][value="1"]`);
+      if (firstOption) firstOption.checked = true;
     }
-    // sessionStorage に JSON 文字列で保存
-    sessionStorage.setItem("ooo_responses", JSON.stringify(data));
-    // result.html に移動
-    window.location.href = "result.html";
+
+    // 送信ボタンの処理
+    document.getElementById("submit").addEventListener("click", () => {
+      const data = [];
+      for (let i = 1; i <= 42; i++) {
+        const radio = form.querySelector(`input[name="q${i}"]:checked`);
+        if (!radio) {
+          alert("チェックされていない箇所があります。");
+          return;
+        }
+        data.push(parseInt(radio.value, 10));
+      }
+      sessionStorage.setItem("ooo_responses", JSON.stringify(data));
+      window.location.href = "result.html";
+    });
   });
 </script>
+

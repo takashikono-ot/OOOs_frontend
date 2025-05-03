@@ -989,32 +989,25 @@
 
   </form>
 
-  <button id="submit" class="btn">診断スタート</button>
-  <div id="result"></div>
-
-  <script>
-    const form = document.getElementById("ooo-form");
-    document.getElementById("submit").addEventListener("click", async () => {
-      const data = [];
-      let missing = false;
-      for (let i = 1; i <= 42; i++) {
-        const radio = form.querySelector(`input[name="q${i}"]:checked`);
-        if (!radio) { missing = true; break; }
-        data.push(parseInt(radio.value));
-      }
-      if (missing) {
+<!-- index.html -->
+…
+  <button type="button" id="submit" class="btn">診断スタート</button>
+…
+<script>
+  const form = document.getElementById("ooo-form");
+  document.getElementById("submit").addEventListener("click", () => {
+    const data = [];
+    for (let i = 1; i <= 42; i++) {
+      const radio = form.querySelector(`input[name="q${i}"]:checked`);
+      if (!radio) {
         alert("チェックされていない箇所があります。");
         return;
       }
-      const res = await fetch("https://ooos-backend.onrender.com/predict", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ responses: data })
-      });
-      const json = await res.json();
-      document.getElementById("result").textContent =
-        `推定ランク：${json.estimated_rank}\n確率：${json.rank_probs.map(p => p.toFixed(2)).join(", ")}`;
-    });
-  </script>
-</body>
-</html>
+      data.push(parseInt(radio.value));
+    }
+    // sessionStorage に JSON 文字列で保存
+    sessionStorage.setItem("ooo_responses", JSON.stringify(data));
+    // result.html に移動
+    window.location.href = "result.html";
+  });
+</script>

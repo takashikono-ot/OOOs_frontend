@@ -996,27 +996,32 @@
   <button id="submit" class="btn">診断スタート</button>
 
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const form = document.getElementById("ooo-form");
-      const submitBtn = document.getElementById("submit");
-      const resultEl = document.getElementById("result");
+  document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("ooo-form");
+    const submitBtn = document.getElementById("submit");
+    const resultEl  = document.getElementById("result");
 
-      // デフォルトチェックの処理など……
+    // …（デフォルトチェックの処理）…
 
-      submitBtn.addEventListener("click", async () => {
-        // …data 配列を作る処理…
+    submitBtn.addEventListener("click", async () => {
+      // ★ここが回答を集める部分です★
+      const data = [];
+      for (let i = 1; i <= 42; i++) {
+        const radio = form.querySelector(`input[name="q${i}"]:checked`);
+        if (!radio) {
+          alert(`設問${i}が未選択です。全て回答してください。`);
+          return;
+        }
+        data.push(parseInt(radio.value, 10));
+      }
 
-        const payload = { responses: data };   // ←ここが重要！
-        const res = await fetch("https://ooos-backend.onrender.com/predict", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
-
-        // …結果表示の処理…
-      });
+      // そしてこの data を payload に詰めて fetch
+      const payload = { responses: data };
+      // …fetch のコード…
     });
-  </script>
+  });
+</script>
+
 </body>
 </html>
 

@@ -16,34 +16,29 @@
   <div id="result" class="result">読み込み中…</div>
   <div class="back"><a href="index.html">&larr; 診断に戻る</a></div>
 
-  <script>
-    (async () => {
-      // 1. 保存された回答データを取り出す
-      const raw = sessionStorage.getItem("ooo_responses");
-      if (!raw) {
-        document.getElementById("result").textContent = "回答データが見つかりません。";
-        return;
-      }
-      const data = JSON.parse(raw);
-
-      try {
-        // 2. バックエンドに POST リクエスト
-        const res = await fetch("https://<あなたのバックエンドドメイン>/predict", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ responses: data })
-        });
-        if (!res.ok) throw new Error(`HTTP エラー: ${res.status}`);
-        const json = await res.json();
-
-        // 3. 結果を表示
-        document.getElementById("result").textContent =
-          `推定ランク：${json.estimated_rank}\n確率：${json.rank_probs.map(p => p.toFixed(2)).join(", ")}`;
-      } catch (err) {
-        console.error(err);
-        document.getElementById("result").textContent = "サーバーエラーが発生しました。";
-      }
-    })();
-  </script>
+ <script>
+  (async () => {
+    const out = document.getElementById("result");
+    out.textContent = "リクエスト中…";
+    try {
+      const res = await fetch("https://ooos-backend.onrender.com/predict", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: sessionStorage.getItem("ooo_responses")
+      });
+      console.log("ステータス:", res.status);
+      console.log("レスポンスヘッダー:", [...res.headers.entries()]);
+      const txt = await res.text();
+      console.log("レスポンステキスト:", txt);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = JSON.parse(txt);
+      out.textContent =
+        `推定ランク：${json.estimated_rank}\n確率：${json.rank_probs.join(", ")}`;
+    } catch (err) {
+      console.error("エラー詳細:", err);
+      out.textContent = "サーバーエラーが発生しました。コンソールをご確認ください。";
+    }
+  })();
+</script>
 </body>
 </html>

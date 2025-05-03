@@ -991,32 +991,32 @@
 
 <!-- index.html -->
 
-  <button type="button" id="submit" class="btn">診断スタート</button>
+  <!-- 省略: 質問のフォームとボタン -->
 
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("ooo-form");
+  <button id="submit" class="btn">診断スタート</button>
 
-    // 各設問のデフォルトで「１」にチェック
-    for (let i = 1; i <= 42; i++) {
-      const firstOption = form.querySelector(`input[name="q${i}"][value="1"]`);
-      if (firstOption) firstOption.checked = true;
-    }
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("ooo-form");
+      const submitBtn = document.getElementById("submit");
+      const resultEl = document.getElementById("result");
 
-    // 送信ボタンの処理
-    document.getElementById("submit").addEventListener("click", () => {
-      const data = [];
-      for (let i = 1; i <= 42; i++) {
-        const radio = form.querySelector(`input[name="q${i}"]:checked`);
-        if (!radio) {
-          alert("チェックされていない箇所があります。");
-          return;
-        }
-        data.push(parseInt(radio.value, 10));
-      }
-      sessionStorage.setItem("ooo_responses", JSON.stringify(data));
-      window.location.href = "result.html";
+      // デフォルトチェックの処理など……
+
+      submitBtn.addEventListener("click", async () => {
+        // …data 配列を作る処理…
+
+        const payload = { responses: data };   // ←ここが重要！
+        const res = await fetch("https://ooos-backend.onrender.com/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        // …結果表示の処理…
+      });
     });
-  });
-</script>
+  </script>
+</body>
+</html>
 

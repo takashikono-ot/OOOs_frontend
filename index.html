@@ -58,36 +58,37 @@
       line-height: 1.4;
     }
 
-    /* 結果を見るボタン */
-    .btn {
-      display: block;
-      width: 100%;
-      max-width: 300px;
-      margin: 2em auto;
-      padding: 12px;
-      background: #26466d;
-      color: #fff;
-      text-align: center;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+   /* 結果を見るボタン */
+.btn {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  margin: 2em auto;
+  padding: 12px;
+  background: #26466d;
+  color: #fff;
+  text-align: center;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  /* 追加：色変化・浮き上がり・影のトランジションを設定 */
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
 
-    .btn:hover {
-      background: #1e3755;
-    }
+.btn:hover {
+  /* 既存の背景色変化 */
+  background: #1e3755;
+  /* 追加：わずかに持ち上げる */
+  transform: translateY(-3px);
+  /* 追加：影を強めて浮遊感を演出 */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
 
-    /* #submit ボタンだけ文字サイズを大きくする */
-    #submit {
-      font-size: 1.4em;
-    }
+/* #submit ボタンだけ文字サイズを大きくする */
+#submit {
+  font-size: 1.4em;
+}
 
-    /* 結果表示 */
-    #result {
-      white-space: pre-wrap;
-      margin-top: 2em;
-      text-align: center;
-    }
   </style>
 </head>
 <body>

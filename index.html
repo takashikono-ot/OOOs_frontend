@@ -43,20 +43,31 @@
     }
 
     /* ラジオ＋テキストをFlexで並べる */
-    .option {
-      display: flex;
-      align-items: flex-start;
-      margin: 0.6em 0;     /* オプション間の余白 */
-    }
+ .option {
+  display: flex;
+  align-items: center;
+  padding: 0.8em 1em;               /* クリックしやすいように内側余白を拡大 */
+  margin: 0.6em 0;
+  border-radius: 4px;               /* ホバー時に角が丸いと優しく見える */
+  cursor: pointer;                  /* ホバーでポインターに */
+  transition: background-color .2s ease;
+}
+.option:hover {
+  background-color: rgba(38,70,109,0.1);  /* 軽い色づきで選択肢を視覚的に強調 */
+}
 
-    .option input[type="radio"] {
-      margin-top: 0.3em;   /* テキストと揃える */
-      margin-right: 0.6em; /* テキストとの間にスペース */
-    }
+.option input[type="radio"] {
+  /* ラジオボタン自体を大きくして押しやすく */
+  width: 1.2em;
+  height: 1.2em;
+  margin-right: 0.8em;
+  margin-top: 0;                    /* テキストと縦中央揃え */
+}
 
-    .option strong {
-      line-height: 1.4;
-    }
+/* ラジオのラベル（強調テキスト）にもカーソルを出す */
+.option strong {
+  cursor: pointer;
+}
 
    /* 結果を見るボタン */
 .btn {

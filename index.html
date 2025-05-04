@@ -1,17 +1,26 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>OOOs 潜在ランクチェック</title>
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet">
   <style>
-    body {
-      font-family: 'M PLUS Rounded 1c', sans-serif;
-      max-width: 800px;
-      margin: auto;
-      padding: 20px;
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; max-width:800px; margin:auto; padding:20px; }
+    h1 { text-align:center; margin-bottom:1em; }
+
+    /* 共通：ステップは非表示(1つだけ表示) */
+    .step { display: none; }
+    .step.active { display: block; }
+
+    /* ボタン */
+    .controls { text-align:right; margin-top:1em; }
+    .controls button {
+      background:#26466d; color:#fff; border:none; border-radius:4px;
+      padding:8px 16px; cursor:pointer; margin-left:8px;
+      transition:background .2s;
     }
+    .controls button:hover { background:#1e3755; }
 
     h1 {
       text-align: center;
@@ -104,7 +113,130 @@
 </head>
 <body>
   <h1>OOOs 潜在ランクチェック</h1>
+
   <form id="ooo-form">
+    <!-- ──────────────── -->
+    <!-- STEP 1: 同意画面 -->
+    <section class="step" data-step="1">
+      <h2>① 研究利用の同意</h2>
+      <label><input type="radio" name="consent" value="yes" required> はい、研究や精度向上に利用してよい</label><br>
+      <label><input type="radio" name="consent" value="no"> いいえ、利用しないでほしい</label>
+
+      <div class="controls">
+        <!-- 戻る不要 -->
+        <button type="button" class="next">次へ &raquo;</button>
+      </div>
+    </section>
+
+    <!-- ──────────────── -->
+<!-- STEP 2: フェイスシート -->
+<section class="step" data-step="2">
+  <h2>② フェイスシート</h2>
+
+  <!-- 性別 -->
+  <div>
+    <label>性別：
+      <select name="gender" required>
+        <option value="">選択してください</option>
+        <option value="男性">男性</option>
+        <option value="女性">女性</option>
+        <option value="その他">その他</option>
+      </select>
+    </label>
+  </div>
+
+  <!-- 年齢 -->
+  <div>
+    <label>年齢：
+      <input type="number" name="age" min="0" required> 歳
+    </label>
+  </div>
+
+  <!-- 取得学位 -->
+  <div>
+    <label>取得している学位：
+      <select name="degree" required>
+        <option value="">選択してください</option>
+        <option value="短期大学士">短期大学士</option>
+        <option value="専門士/高度専門士">専門士/高度専門士</option>
+        <option value="学士">学士</option>
+        <option value="修士">修士</option>
+        <option value="博士">博士</option>
+        <option value="その他">その他</option>
+      </select>
+    </label>
+  </div>
+
+  <!-- 国家資格取得後の年数 -->
+  <div>
+    <label>国家資格取得後の年数：
+      <input type="number" name="yearsLicensed" min="0" required> 年目
+    </label>
+  </div>
+
+  <!-- 主な専門領域 -->
+  <div>
+    <label>作業療法の主な専門領域：
+      <select name="specialty" required>
+        <option value="">選択してください</option>
+        <option value="身体障害">身体障害</option>
+        <option value="精神障害">精神障害</option>
+        <option value="発達障害">発達障害</option>
+        <option value="老年期障害">老年期障害</option>
+        <option value="その他">その他</option>
+      </select>
+    </label>
+  </div>
+
+  <!-- OCPOFPOBPをどの程度知っていますか？ -->
+  <div>
+    <label>OCPOFPOBPをどの程度知っていますか？：
+      <select name="knowledgeLevel" required>
+        <option value="">選択してください</option>
+        <option value="1">1: 全く知らない</option>
+        <option value="2">2: 聞いたことはある</option>
+        <option value="3">3: ある程度知っている</option>
+        <option value="4">4: よく知っている</option>
+      </select>
+    </label>
+  </div>
+
+  <!-- OCPOFPOBPをどの程度実施していますか？ -->
+  <div>
+    <label>OCPOFPOBPをどの程度実施していますか？：
+      <select name="implementationLevel" required>
+        <option value="">選択してください</option>
+        <option value="1">1: 全く実施していない</option>
+        <option value="2">2: 少し実施している</option>
+        <option value="3">3: ある程度実施している</option>
+        <option value="4">4: 積極的に実施している</option>
+      </select>
+    </label>
+  </div>
+
+  <!-- 実施しやすい職場環境ですか？ -->
+  <div>
+    <label>OCPOFPOBPが実施しやすい職場環境ですか？：
+      <select name="environmentSupport" required>
+        <option value="">選択してください</option>
+        <option value="1">1: 全く実施しにくい</option>
+        <option value="2">2: やや実施しにくい</option>
+        <option value="3">3: やや実施しやすい</option>
+        <option value="4">4: 非常に実施しやすい</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="controls">
+    <button type="button" class="prev">&laquo; 戻る</button>
+    <button type="button" class="next">次へ &raquo;</button>
+  </div>
+</section>
+
+    <!-- ──────────────── -->
+    <!-- STEP 3: アンケート42問 -->
+    <section class="step" data-step="3">
+    <h2>③ OOOs </h2>
     <!-- OCP カテゴリ -->
     <h3>作業中心実践（OCP）</h3>
 
@@ -998,37 +1130,60 @@
   </label>
 </div>
 
+      <div class="controls">
+        <button type="button" class="prev">&laquo; 戻る</button>
+        <button type="submit" id="submit">結果を見る</button>
+      </div>
+    </section>
   </form>
 
- <button id="submit" class="btn">結果を見る</button>
-
   <script>
-    // 即時関数で即実行
-    (function() {
-      const form = document.getElementById("ooo-form");
-      const submitBtn = document.getElementById("submit");
+    (function(){
+      const form   = document.getElementById('ooo-form');
+      const steps  = Array.from(document.querySelectorAll('.step'));
+      let   idx    = 0;
+      const show   = i => {
+        steps.forEach((s, j)=> s.classList.toggle('active', j===i));
+      };
+      show(idx);
 
-      // デフォルトで「１」をチェック
-      for (let i = 1; i <= 42; i++) {
-        const first = form.querySelector(`input[name="q${i}"][value="1"]`);
-        if (first) first.checked = true;
-      }
+      // Next ボタン
+      form.querySelectorAll('.next').forEach(btn =>
+        btn.addEventListener('click', ()=>{
+          // 必要ならここで現在ステップの簡易バリデーションも入れられます
+          if (idx < steps.length-1) idx++;
+          show(idx);
+        })
+      );
 
-      submitBtn.addEventListener("click", () => {
-        const data = [];
-        for (let i = 1; i <= 42; i++) {
-          const radio = form.querySelector(`input[name="q${i}"]:checked`);
-          if (!radio) {
-            alert(`設問${i}が未選択です。全て回答してください。`);
-            return;
+      // Prev ボタン
+      form.querySelectorAll('.prev').forEach(btn =>
+        btn.addEventListener('click', ()=>{
+          if (idx > 0) idx--;
+          show(idx);
+        })
+      );
+
+      // 最終ステップ送信
+      form.addEventListener('submit', e=>{
+        e.preventDefault();
+        // ここで form.elements から consent／faceSheet／answers をまとめて取得・API送信 or sessionStorage に放り込む
+        const data = {};
+        Array.from(form.elements).forEach(el=>{
+          if (!el.name) return;
+          if (el.type === 'radio') {
+            if (!el.checked) return;
+            data[el.name] = el.value;
+          } else {
+            data[el.name] = el.value;
           }
-          data.push(parseInt(radio.value, 10));
-        }
-
-        sessionStorage.setItem("ooo_responses", JSON.stringify(data));
-        window.location.href = "result.html";
+        });
+        // 例：sessionStorage に保存して result.html に渡す
+        sessionStorage.setItem('ooo_all', JSON.stringify(data));
+        window.location.href = 'result.html';
       });
     })();
   </script>
 </body>
 </html>
+

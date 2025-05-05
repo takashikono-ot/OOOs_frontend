@@ -14,13 +14,31 @@
     .step.active { display: block; }
 
     /* ボタン */
-    .controls { text-align:right; margin-top:1em; }
-    .controls button {
-      background:#26466d; color:#fff; border:none; border-radius:4px;
-      padding:8px 16px; cursor:pointer; margin-left:8px;
-      transition:background .2s;
-    }
-    .controls button:hover { background:#1e3755; }
+.controls {
+  text-align: center;
+  margin-top: 1em;
+}
+.controls button,
+#submit {
+  display: inline-block;
+  background-color: #26466d;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 16px;
+  cursor: pointer;
+  margin: 0.5em;
+  transition:
+    background-color 0.3s ease,
+    transform        0.2s ease,
+    box-shadow       0.2s ease;
+}
+.controls button:hover,
+#submit:hover {
+  background-color: #1e3755;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
 
     h1 {
       text-align: center;
@@ -109,7 +127,18 @@
   font-size: 1.4em;
 }
 
-  </style>
+/* ─── STEP2（フェイスシート）の行間を広げる ─── */
+.step[data-step="2"] > div {
+  margin-bottom: 1.2em;
+}
+
+/* ─── 「年齢」と「国家資格取得後の年数」の入力幅を２桁分に ─── */
+.step[data-step="2"] input[name="age"],
+.step[data-step="2"] input[name="yearsLicensed"] {
+  width: 4ch;
+}
+    
+</style>
 </head>
 <body>
   <h1>OOOs 潜在ランクチェック</h1>
@@ -118,7 +147,7 @@
     <!-- ──────────────── -->
     <!-- STEP 1: 同意画面 -->
     <section class="step" data-step="1">
-      <h2>① 研究利用の同意</h2>
+      <h2>研究利用の同意</h2>
       <label><input type="radio" name="consent" value="yes" required> はい、研究や精度向上に利用してよい</label><br>
       <label><input type="radio" name="consent" value="no"> いいえ、利用しないでほしい</label>
 
@@ -131,7 +160,7 @@
     <!-- ──────────────── -->
 <!-- STEP 2: フェイスシート -->
 <section class="step" data-step="2">
-  <h2>② フェイスシート</h2>
+  <h2>フェイスシート</h2>
 
   <!-- 性別 -->
   <div>
@@ -190,7 +219,7 @@
 
   <!-- OCPOFPOBPをどの程度知っていますか？ -->
   <div>
-    <label>OCPOFPOBPをどの程度知っていますか？：
+    <label>OCP・OFP・OBPをどの程度知っていますか？：
       <select name="knowledgeLevel" required>
         <option value="">選択してください</option>
         <option value="1">1: 全く知らない</option>
@@ -203,7 +232,7 @@
 
   <!-- OCPOFPOBPをどの程度実施していますか？ -->
   <div>
-    <label>OCPOFPOBPをどの程度実施していますか？：
+    <label>OCP・OFP・OBPをどの程度実施していますか？：
       <select name="implementationLevel" required>
         <option value="">選択してください</option>
         <option value="1">1: 全く実施していない</option>
@@ -216,7 +245,7 @@
 
   <!-- 実施しやすい職場環境ですか？ -->
   <div>
-    <label>OCPOFPOBPが実施しやすい職場環境ですか？：
+    <label>OCP・OFP・OBPが実施しやすい職場環境ですか？：
       <select name="environmentSupport" required>
         <option value="">選択してください</option>
         <option value="1">1: 全く実施しにくい</option>
@@ -236,7 +265,6 @@
     <!-- ──────────────── -->
     <!-- STEP 3: アンケート42問 -->
     <section class="step" data-step="3">
-    <h2>③ OOOs </h2>
     <!-- OCP カテゴリ -->
     <h3>作業中心実践（OCP）</h3>
 
@@ -1137,22 +1165,23 @@
     </section>
   </form>
 
-  <script>
-    (function(){
-      const form   = document.getElementById('ooo-form');
-      const steps  = Array.from(document.querySelectorAll('.step'));
-      let   idx    = 0;
-      const show   = i => {
-        steps.forEach((s, j)=> s.classList.toggle('active', j===i));
-      };
-      show(idx);
+<script>
+  (function(){
+    // ─── デフォルト値を“1”にセット ───
+    document.addEventListener('DOMContentLoaded', ()=>{
+      for(let i=1; i<=42; i++){
+        const first = document.querySelector(`input[name="q${i}"][value="1"]`);
+        if(first) first.checked = true;
+      }
+    });
 
-      // Next ボタン
-      form.querySelectorAll('.next').forEach(btn =>
-        btn.addEventListener('click', ()=>{
-          // 必要ならここで現在ステップの簡易バリデーションも入れられます
-          if (idx < steps.length-1) idx++;
-          show(idx);
+    const form   = document.getElementById('ooo-form');
+    const steps  = Array.from(document.querySelectorAll('.step'));
+    let   idx    = 0;
+    const show   = i => {
+      steps.forEach((s, j)=> s.classList.toggle('active', j===i));
+    };
+    show(idx);
         })
       );
 

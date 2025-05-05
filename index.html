@@ -1173,14 +1173,15 @@
   /* --- Supabase 初期化 --- */
   const SUPABASE_URL     = 'https://wapsozrmlvyqlgeveomx.supabase.co';
   const SUPABASE_ANONKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhcHNvenJtbHZ5cWxnZXZlb214Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzOTI2OTgsImV4cCI6MjA2MTk2ODY5OH0.4DrAI4mK4Xw17xqqqlYROqdJGX39hP68JCGMUVMD0hc';
-  const supabase         = supabase.createClient(SUPABASE_URL, SUPABASE_ANONKEY);
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANONKEY);
 
   /* --- DOM が組み上がったら実行 --- */
   document.addEventListener('DOMContentLoaded', () => {
-    /* デフォルトで 1 点をチェック */
-    for (let i = 1; i <= 42; i++) {
-      document.querySelector(`input[name="q${i}"][value="1"]`)?.checked = true;
-    }
+  /* デフォルトで 1 点をチェック */
+  for (let i = 1; i <= 42; i++) {
+    const radio = document.querySelector(`input[name="q${i}"][value="1"]`);
+    if (radio) radio.checked = true;
+   }
 
     /* --- 多段フォームの制御 --- */
     const form   = document.getElementById('ooo-form');

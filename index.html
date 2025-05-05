@@ -1183,13 +1183,22 @@
   };
   show(idx);
 
-  // Next ボタン
-  form.querySelectorAll('.next').forEach(btn =>
-    btn.addEventListener('click', ()=>{
-      if (idx < steps.length - 1) idx++;
-      show(idx);
-    })
-  );
+// Next ボタン
+form.querySelectorAll('.next').forEach(btn =>
+  btn.addEventListener('click', ()=>{
+    /* ---------- ここから追加 ---------- */
+    const invalid = steps[idx].querySelector(':invalid');
+    if (invalid) {        // 1 つでも空欄があれば
+      invalid.reportValidity(); // ブラウザ標準エラー表示
+      return;             // 次のステップへは進まない
+    }
+    /* ---------- ここまで追加 ---------- */
+
+    if (idx < steps.length - 1) idx++;
+    show(idx);
+  })
+);
+
 
   // Prev ボタン
   form.querySelectorAll('.prev').forEach(btn =>

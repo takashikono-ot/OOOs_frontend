@@ -6,14 +6,16 @@
   <style>
     body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 20px; }
     .question { margin-bottom: 1em; }
-    .q-label { display: block; margin-bottom: 0.4em; font-weight: bold; }
-    .btn { padding: 10px 20px; background: #26466d; color: #fff; border:none; border-radius:4px; cursor:pointer; }
-    .btn:hover { background: #1e3755; }
-    #result { margin-top: 2em; white-space: pre-wrap; }
+    .q-label  { display: block; margin-bottom: 0.4em; font-weight: bold; }
+    .btn      { padding: 10px 20px; background: #26466d; color: #fff;
+                border:none; border-radius:4px; cursor:pointer; }
+    .btn:hover{ background: #1e3755; }
+    #result   { margin-top: 2em; white-space: pre-wrap; }
   </style>
 </head>
 <body>
   <h1>OOOs 潜在ランク診断</h1>
+
   <form id="ooo-form">
     <!-- ここから質問の静的HTML（OCP14問） -->
    <h3>作業中心実践（OCP）</h3>
@@ -913,64 +915,67 @@
  <!-- 質問の静的HTMLここまで -->
   </form>
 
-  <button id="submit" class="btn">結果を見る</button>
+  <!-- ★ type="button" でネイティブ送信を抑止 -->
+  <button id="submit" class="btn" type="button">結果を見る</button>
+
   <div id="result"></div>
 
+<!-- ── JavaScript ─────────────────────────────────────── -->
 <script>
-  const form = document.getElementById("ooo-form");
-  const resultEl = document.getElementById("result");
+  const form      = document.getElementById("ooo-form");
+  const resultEl  = document.getElementById("result");
   const submitBtn = document.getElementById("submit");
 
+  /* ★ Enter キーなどによるネイティブ送信を完全無効化 */
+  form.addEventListener("submit", e => e.preventDefault());
+
   submitBtn.addEventListener("click", async () => {
-    // 前回の結果をクリア
     resultEl.textContent = "";
 
-    // ① 未回答チェック & 42問の回答を data に格納
-    const data = [];
+    /* 1. 42 問の回答を数値配列へ */
+    const responses = [];
     for (let i = 1; i <= 42; i++) {
       const radio = form.querySelector(`input[name="q${i}"]:checked`);
       if (!radio) {
         alert(`設問${i}が未選択です。全て回答してください。`);
         return;
       }
-      data.push(parseInt(radio.value, 10));
+      responses.push(Number(radio.value));
     }
 
-    // 二重押し防止
-    submitBtn.disabled = true;
+    /* 2. ボタン凍結 */
+    submitBtn.disabled  = true;
     submitBtn.textContent = "診断中…";
 
     try {
-      // ② フォームの他フィールドをすべて拾う
-      const payload = {};
-      new FormData(form).forEach((value, key) => {
-        payload[key] = value;
-      });
-      // ③ 42問回答だけ別プロパティに
-      payload.responses = data;
-
-      // ④ 一括送信
+      /* 3. 42 項目だけ送信 */
       const res = await fetch("https://ooos-backend.onrender.com/predict", {
-        method: "POST",
+        method : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body   : JSON.stringify({ responses })
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
       const json = await res.json();
+
+      /* 4. 結果表示（確率を％表示に） */
+      const probs = json.rank_probs
+        .map(p => (p * 100).toFixed(1) + "%")
+        .join(", ");
+
       resultEl.textContent =
-        `推定ランク：${json.estimated_rank}\n確率：${json.rank_probs.map(p => p.toFixed(2)).join(", ")}`;
+        `推定ランク：${json.estimated_rank}\n` +
+        `確率：${probs}`;
 
     } catch (err) {
       console.error(err);
-      resultEl.textContent = "サーバーエラーが発生しました。時間をおいて再度お試しください。";
+      resultEl.textContent =
+        "サーバーエラーが発生しました。時間をおいて再度お試しください。";
     } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "診断スタート";
+      submitBtn.disabled  = false;
+      submitBtn.textContent = "結果を見る";
     }
   });
 </script>
-
 </body>
 </html>

@@ -1168,12 +1168,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/index.min.js"></script>
 
 <script>
-/* ===== アプリ全体を 1 つの IIFE に集約 ===== */
 (() => {
   /* --- Supabase 初期化 --- */
-  const SUPABASE_URL     = 'https://wapsozrmlvyqlgeveomx.supabase.co';
+  const SUPABASE_URL  = 'https://wapsozrmlvyqlgeveomx.supabase.co';
   const SUPABASE_ANONKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhcHNvenJtbHZ5cWxnZXZlb214Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzOTI2OTgsImV4cCI6MjA2MTk2ODY5OH0.4DrAI4mK4Xw17xqqqlYROqdJGX39hP68JCGMUVMD0hc';
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANONKEY);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANONKEY);
 
   /* --- DOM が組み上がったら実行 --- */
   document.addEventListener('DOMContentLoaded', () => {
@@ -1236,7 +1235,7 @@
 
       /* ③ Supabase に INSERT */
       try {
-        const { error } = await supabase
+        const { error } = await sb
           .from('ooo_responses')
           .insert([payload]);
         if (error) throw error;

@@ -95,15 +95,14 @@
         const obp = sum(responses.slice(28, 42));
         const total = ocp + ofp + obp;
 
-        // サーバー呼び出し
-        const res = await fetch("https://ooos-backend.onrender.com/predict", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          // 回答だけ送りたい場合
-      // body: JSON.stringify({ responses })
-      // フェイスシート情報など全データも送りたい場合
-      body: JSON.stringify(allData)
-    });
+       // サーバー呼び出し
+       const res = await fetch(..., {
+       method: "POST",
+       headers: { "Content-Type": "application/json" },
+       // 回答だけ送りたい場合
+   　 　body: JSON.stringify({ responses })
+       });
+
         const txt = await res.text();
         if (!res.ok) throw new Error(`HTTP ${res.status}: ${txt}`);
         const json = JSON.parse(txt);

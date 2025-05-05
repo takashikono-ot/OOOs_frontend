@@ -82,7 +82,11 @@
         // 回答配列の取得
         const raw = sessionStorage.getItem("ooo_responses");
         if (!raw) throw new Error("responsesが見つかりません");
-        const responses = JSON.parse(raw);
+        const allData = JSON.parse(raw);
+        // q1～q42 を順に数値に変換して配列にする
+        const responses = Array.from({ length: 42 }, (_, i) =>
+          parseInt(allData[`q${i + 1}`], 10)
+        );
 
         // カテゴリごとのスコア計算
         const sum = arr => arr.reduce((a,b) => a+b, 0);
@@ -95,8 +99,11 @@
         const res = await fetch("https://ooos-backend.onrender.com/predict", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ responses })
-        });
+          // 回答だけ送りたい場合
+      // body: JSON.stringify({ responses })
+      // フェイスシート情報など全データも送りたい場合
+      body: JSON.stringify(allData)
+    });
         const txt = await res.text();
         if (!res.ok) throw new Error(`HTTP ${res.status}: ${txt}`);
         const json = JSON.parse(txt);

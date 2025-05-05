@@ -4,39 +4,18 @@
   <meta charset="UTF-8">
   <title>結果発表</title>
   <style>
-    body {
-      font-family: 'M PLUS Rounded 1c', sans-serif;
-      max-width:600px;
-      margin:auto;
-      padding:20px;
-      position: relative;    /* 追加：子要素の絶対配置を可能にする */
+    body{
+      font-family:'M PLUS Rounded 1c',sans-serif;
+      max-width:600px;margin:auto;padding:20px;position:relative;
     }
-    h1 { text-align:center; margin-bottom:1em; }
-    .result { text-align:center; display: none; }  /* 初期は非表示 */
-    .score-breakdown { margin: 1em 0; font-size: 1.1em; display: none; }
-    .back { margin-top:2em; text-align:center; }
-    .back a { color:#26466d; text-decoration:none; font-weight:bold; }
-    #chart-container { max-width: 500px; margin: 1em auto; display: none; }
-
-    /* オーズくん画像のスタイル */
-    .ooos-kun {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      width: 120px;
-      pointer-events: none;
-      opacity: 0.8;
-    }
-
-    /* Oローディングアニメ用 */
-    #roman-loader {
-      font-family: 'M PLUS Rounded 1c', sans-serif;
-      font-size: 2rem;
-      letter-spacing: 0.2em;
-      color: #26466d;
-      text-align: center;
-      margin: 2em auto;
-    }
+    h1{text-align:center;margin-bottom:1em;}
+    .result{display:none;text-align:center;}
+    .score-breakdown{display:none;margin:1em 0;font-size:1.1em;}
+    .back{margin-top:2em;text-align:center;}
+    .back a{color:#26466d;text-decoration:none;font-weight:bold;}
+    #chart-container{display:none;max-width:500px;margin:1em auto;}
+    .ooos-kun{position:absolute;bottom:10px;right:10px;width:120px;pointer-events:none;opacity:.8;}
+    #roman-loader{font-family:'M PLUS Rounded 1c',sans-serif;font-size:2rem;letter-spacing:.2em;color:#26466d;text-align:center;margin:2em auto;}
   </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -47,124 +26,124 @@
   <div id="roman-loader">O</div>
 
   <!-- 結果表示エリア -->
-  <div class="result" id="status"></div>
-  <!-- カテゴリごとの点数表示 -->
-  <div class="score-breakdown" id="breakdown"></div>
+  <div id="status"        class="result"></div>
+  <div id="breakdown"     class="score-breakdown"></div>
 
   <div id="chart-container">
     <canvas id="prob-chart"></canvas>
   </div>
 
   <div class="back">
-  <a href="https://ooos-toppage.netlify.app/">&larr; トップページに戻る</a>
-　</div>
+    <a href="https://ooos-toppage.netlify.app/">&larr; トップページに戻る</a>
+  </div>
 
-  <!-- オーズくん背景透過画像 -->
   <img src="オーズくん背景透過.png" alt="オーズくん" class="ooos-kun">
 
   <script>
-    // Oローディングアニメ制御
-    const loader = document.getElementById('roman-loader');
-    const maxCount = 5;
-    let count = 1;
-    const intervalId = setInterval(() => {
-      count = count < maxCount ? count + 1 : 1;
-      loader.textContent = 'O'.repeat(count);
-    }, 400);
+  /* ---------------- ローディングアニメ ---------------- */
+  const loader   = document.getElementById('roman-loader');
+  const maxCount = 5;
+  let   count    = 1;
+  const intervalId = setInterval(()=>{
+    count = (count < maxCount) ? count + 1 : 1;
+    loader.textContent = 'O'.repeat(count);
+  },400);
 
-    (async () => {
-      const statusEl = document.getElementById("status");
-      const breakdownEl = document.getElementById("breakdown");
-      const chartContainer = document.getElementById("chart-container");
-      const ctx = document.getElementById("prob-chart").getContext("2d");
+  /* ---------------- メイン処理 ---------------- */
+  (async ()=>{
+    const statusEl      = document.getElementById('status');
+    const breakdownEl   = document.getElementById('breakdown');
+    const chartContainer= document.getElementById('chart-container');
+    const ctx           = document.getElementById('prob-chart').getContext('2d');
 
-      try {
-        // 回答配列の取得
-        const raw = sessionStorage.getItem("ooo_responses");
-        if (!raw) throw new Error("responsesが見つかりません");
-        const allData = JSON.parse(raw);
-        // q1～q42 を順に数値に変換して配列にする
-        const responses = Array.from({ length: 42 }, (_, i) =>
-          parseInt(allData[`q${i + 1}`], 10)
-        );
+    try{
+      /* 1. sessionStorage から回答を取得 */
+      const raw = sessionStorage.getItem('ooo_responses');
+      if(!raw) throw new Error('responses が見つかりません');
+      const allData  = JSON.parse(raw);
 
-        // カテゴリごとのスコア計算
-        const sum = arr => arr.reduce((a,b) => a+b, 0);
-        const ocp = sum(responses.slice(0, 14));
-        const ofp = sum(responses.slice(14, 28));
-        const obp = sum(responses.slice(28, 42));
-        const total = ocp + ofp + obp;
+      /* 2. q1–q42 を数値配列へ */
+      const responses = Array.from({length:42},(_,i)=>
+        parseInt(allData[`q${i+1}`],10)
+      );
 
-       // サーバー呼び出し
-       const res = await fetch(..., {
-       method: "POST",
-       headers: { "Content-Type": "application/json" },
-       // 回答だけ送りたい場合
-   　 　body: JSON.stringify({ responses })
-       });
+      /* 3. カテゴリ別スコア計算 */
+      const sum = arr=>arr.reduce((a,b)=>a+b,0);
+      const ocp = sum(responses.slice(0 ,14));
+      const ofp = sum(responses.slice(14,28));
+      const obp = sum(responses.slice(28,42));
+      const total = ocp+ofp+obp;
 
-        const txt = await res.text();
-        if (!res.ok) throw new Error(`HTTP ${res.status}: ${txt}`);
-        const json = JSON.parse(txt);
+      /* 4. バックエンドへ POST */
+      const res = await fetch(
+        "https://ooos-backend.onrender.com/predict",
+        {
+          method : "POST",
+          headers: { "Content-Type": "application/json" },
+          body   : JSON.stringify({ responses })   // 42 項目だけ送信
+        }
+      );
 
-        // ローディング停止＆非表示
-        clearInterval(intervalId);
-        loader.style.display = 'none';
+      const txt = await res.text();
+      if(!res.ok) throw new Error(`HTTP ${res.status}: ${txt}`);
+      const json = JSON.parse(txt); // { rank_probs:[…], estimated_rank:… }
 
-        // 結果エリアを表示
-        statusEl.style.display = 'block';
-        breakdownEl.style.display = 'block';
-        chartContainer.style.display = 'block';
+      /* 5. アニメ停止・画面表示 */
+      clearInterval(intervalId);
+      loader.style.display = 'none';
 
-        // テキスト表示
-        statusEl.innerHTML =
-          `推定ランク：<strong>${json.estimated_rank}</strong><br>` +
-          `（確率：${json.rank_probs.map(p => (p*100).toFixed(1)).join("%, ")}%）`;
+      statusEl.style.display      = 'block';
+      breakdownEl.style.display   = 'block';
+      chartContainer.style.display= 'block';
 
-        // カテゴリごとと合計の表示
-        breakdownEl.innerHTML =
-          `OCP: ${ocp} 点<br>` +
-          `OFP: ${ofp} 点<br>` +
-          `OBP: ${obp} 点<br>` +
-          `<strong>合計: ${total} 点</strong>`;
+      /* 6. テキスト出力 */
+      statusEl.innerHTML =
+        `推定ランク：<strong>${json.estimated_rank}</strong><br>`+
+        `（確率：${json.rank_probs.map(p=>(p*100).toFixed(1)).join('%, ')}%）`;
 
-        // 棒グラフ描画
-        new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: ['Rank 1','Rank 2','Rank 3','Rank 4','Rank 5','Rank 6','Rank 7'],
-            datasets: [{
-              label: '所属確率（％）',
-              data: json.rank_probs.map(p => p * 100),
-              borderWidth: 1
-            }]
+      breakdownEl.innerHTML =
+        `OCP: ${ocp} 点<br>`+
+        `OFP: ${ofp} 点<br>`+
+        `OBP: ${obp} 点<br>`+
+        `<strong>合計: ${total} 点</strong>`;
+
+      /* 7. 棒グラフ描画 */
+      new Chart(ctx,{
+        type:'bar',
+        data:{
+          labels:['Rank 1','Rank 2','Rank 3','Rank 4','Rank 5','Rank 6','Rank 7'],
+          datasets:[{
+            label:'所属確率（％）',
+            data : json.rank_probs.map(p=>p*100),
+            borderWidth:1
+          }]
+        },
+        options:{
+          scales:{
+            y:{
+              beginAtZero:true,
+              ticks:{callback:v=>v+'%'}
+            }
           },
-          options: {
-            scales: {
-              y: {
-                beginAtZero: true,
-                ticks: { callback: v => v + '%' }
-              }
-            },
-            plugins: {
-              legend: { display: false },
-              tooltip: {
-                callbacks: {
-                  label: ctx => `${ctx.parsed.y.toFixed(1)}%`
-                }
+          plugins:{
+            legend:{display:false},
+            tooltip:{
+              callbacks:{
+                label:c=>`${c.parsed.y.toFixed(1)}%`
               }
             }
           }
-        });
+        }
+      });
 
-      } catch (err) {
-        console.error("エラー詳細:", err);
-        clearInterval(intervalId);
-        loader.style.display = 'none';
-        statusEl.style.display = 'block';
-        statusEl.textContent = "サーバーエラーが発生しました。コンソールをご確認ください。";
-      }
-    })();
+    }catch(err){
+      console.error('エラー詳細:',err);
+      clearInterval(intervalId);
+      loader.style.display = 'none';
+      statusEl.style.display= 'block';
+      statusEl.textContent = 'サーバーエラーが発生しました。コンソールをご確認ください。';
+    }
+  })();
   </script>
 </body>
 </html>

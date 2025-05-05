@@ -1166,53 +1166,58 @@
   </form>
 
 <script>
-  (function(){
-    // ─── デフォルト値を“1”にセット ───
-    document.addEventListener('DOMContentLoaded', ()=>{
-      for(let i=1; i<=42; i++){
-        const first = document.querySelector(`input[name="q${i}"][value="1"]`);
-        if(first) first.checked = true;
+(function(){
+  // ─── デフォルト値を“1”にセット ───
+  document.addEventListener('DOMContentLoaded', ()=>{
+    for(let i = 1; i <= 42; i++){
+      const first = document.querySelector(`input[name="q${i}"][value="1"]`);
+      if(first) first.checked = true;
+    }
+  });
+
+  const form   = document.getElementById('ooo-form');
+  const steps  = Array.from(document.querySelectorAll('.step'));
+  let   idx    = 0;
+  const show   = i => {
+    steps.forEach((s, j)=> s.classList.toggle('active', j === i));
+  };
+  show(idx);
+
+  // Next ボタン
+  form.querySelectorAll('.next').forEach(btn =>
+    btn.addEventListener('click', ()=>{
+      if (idx < steps.length - 1) idx++;
+      show(idx);
+    })
+  );
+
+  // Prev ボタン
+  form.querySelectorAll('.prev').forEach(btn =>
+    btn.addEventListener('click', ()=>{
+      if (idx > 0) idx--;
+      show(idx);
+    })
+  );
+
+  // 最終ステップ送信
+  form.addEventListener('submit', e=>{
+    e.preventDefault();
+    const data = {};
+    Array.from(form.elements).forEach(el=>{
+      if (!el.name) return;
+      if (el.type === 'radio') {
+        if (!el.checked) return;
+        data[el.name] = el.value;
+      } else {
+        data[el.name] = el.value;
       }
     });
+    sessionStorage.setItem('ooo_all', JSON.stringify(data));
+    window.location.href = 'result.html';
+  });
 
-    const form   = document.getElementById('ooo-form');
-    const steps  = Array.from(document.querySelectorAll('.step'));
-    let   idx    = 0;
-    const show   = i => {
-      steps.forEach((s, j)=> s.classList.toggle('active', j===i));
-    };
-    show(idx);
-        })
-      );
-
-      // Prev ボタン
-      form.querySelectorAll('.prev').forEach(btn =>
-        btn.addEventListener('click', ()=>{
-          if (idx > 0) idx--;
-          show(idx);
-        })
-      );
-
-      // 最終ステップ送信
-      form.addEventListener('submit', e=>{
-        e.preventDefault();
-        // ここで form.elements から consent／faceSheet／answers をまとめて取得・API送信 or sessionStorage に放り込む
-        const data = {};
-        Array.from(form.elements).forEach(el=>{
-          if (!el.name) return;
-          if (el.type === 'radio') {
-            if (!el.checked) return;
-            data[el.name] = el.value;
-          } else {
-            data[el.name] = el.value;
-          }
-        });
-        // 例：sessionStorage に保存して result.html に渡す
-        sessionStorage.setItem('ooo_all', JSON.stringify(data));
-        window.location.href = 'result.html';
-      });
-    })();
-  </script>
+})();
+</script>
 </body>
 </html>
 

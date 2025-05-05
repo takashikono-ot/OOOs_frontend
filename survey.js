@@ -913,38 +913,47 @@
  <!-- 質問の静的HTMLここまで -->
   </form>
 
-  <button id="submit" class="btn">診断スタート</button>
+  <button id="submit" class="btn">結果を見る</button>
   <div id="result"></div>
 
- <script>
+<script>
   const form = document.getElementById("ooo-form");
   const resultEl = document.getElementById("result");
   const submitBtn = document.getElementById("submit");
 
   submitBtn.addEventListener("click", async () => {
-  // ここで前回の結果をクリア
-  resultEl.textContent = "";
+    // 前回の結果をクリア
+    resultEl.textContent = "";
 
-  // 未回答チェック
-  const data = [];
-  for (let i = 1; i <= 42; i++) {
-    const radio = form.querySelector(`input[name="q${i}"]:checked`);
-    if (!radio) {
-      alert(`設問${i}が未選択です。全て回答してください。`);
-      return;
+    // ① 未回答チェック & 42問の回答を data に格納
+    const data = [];
+    for (let i = 1; i <= 42; i++) {
+      const radio = form.querySelector(`input[name="q${i}"]:checked`);
+      if (!radio) {
+        alert(`設問${i}が未選択です。全て回答してください。`);
+        return;
+      }
+      data.push(parseInt(radio.value, 10));
     }
-    data.push(parseInt(radio.value, 10));
-  }
 
-  // 二重押し防止
+    // 二重押し防止
     submitBtn.disabled = true;
     submitBtn.textContent = "診断中…";
 
     try {
+      // ② フォームの他フィールドをすべて拾う
+      const payload = {};
+      new FormData(form).forEach((value, key) => {
+        payload[key] = value;
+      });
+      // ③ 42問回答だけ別プロパティに
+      payload.responses = data;
+
+      // ④ 一括送信
       const res = await fetch("https://ooos-backend.onrender.com/predict", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ responses: data })
+        body: JSON.stringify(payload)
       });
 
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -952,6 +961,7 @@
       const json = await res.json();
       resultEl.textContent =
         `推定ランク：${json.estimated_rank}\n確率：${json.rank_probs.map(p => p.toFixed(2)).join(", ")}`;
+
     } catch (err) {
       console.error(err);
       resultEl.textContent = "サーバーエラーが発生しました。時間をおいて再度お試しください。";

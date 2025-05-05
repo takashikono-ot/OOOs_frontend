@@ -139,6 +139,10 @@
 }
     
 </style>
+<!-- Supabase JS (UMD) を読み込み -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/index.min.js"></script>
+  
+  
 </head>
 <body>
   <h1>OOOs 潜在ランクチェック</h1>
@@ -1167,6 +1171,11 @@
 
 <script>
 (function(){
+  // ── Supabase クライアントを初期化 ──
+  const SUPABASE_URL     = 'https://…supabase.co';
+  const SUPABASE_ANONKEY = 'eyJ…';  // your anon key
+  const supabase         = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANONKEY);
+
   // ─── デフォルト値を“1”にセット ───
   document.addEventListener('DOMContentLoaded', ()=>{
     for(let i = 1; i <= 42; i++){
@@ -1178,55 +1187,75 @@
   const form   = document.getElementById('ooo-form');
   const steps  = Array.from(document.querySelectorAll('.step'));
   let   idx    = 0;
-  const show   = i => {
-    steps.forEach((s, j)=> s.classList.toggle('active', j === i));
-  };
+  const show   = i => steps.forEach((s,j)=> s.classList.toggle('active', j===i));
   show(idx);
 
-// Next ボタン
-form.querySelectorAll('.next').forEach(btn =>
-  btn.addEventListener('click', ()=>{
-    /* ---------- ここから追加 ---------- */
-    const invalid = steps[idx].querySelector(':invalid');
-    if (invalid) {        // 1 つでも空欄があれば
-      invalid.reportValidity(); // ブラウザ標準エラー表示
-      return;             // 次のステップへは進まない
-    }
-    /* ---------- ここまで追加 ---------- */
-
-    if (idx < steps.length - 1) idx++;
-    show(idx);
-  })
-);
-
-
-  // Prev ボタン
-  form.querySelectorAll('.prev').forEach(btn =>
+  // Next
+  form.querySelectorAll('.next').forEach(btn =>
     btn.addEventListener('click', ()=>{
-      if (idx > 0) idx--;
+      const invalid = steps[idx].querySelector(':invalid');
+      if(invalid){ invalid.reportValidity(); return; }
+      if(idx < steps.length-1) idx++;
       show(idx);
     })
   );
 
-  // 最終ステップ送信
-  form.addEventListener('submit', e=>{
+  // Prev
+  form.querySelectorAll('.prev').forEach(btn =>
+    btn.addEventListener('click', ()=>{
+      if(idx>0) idx--;
+      show(idx);
+    })
+  );
+
+  // Submit
+  form.addEventListener('submit', async e=>{
     e.preventDefault();
+
+    // collect data
     const data = {};
     Array.from(form.elements).forEach(el=>{
-      if (!el.name) return;
-      if (el.type === 'radio') {
-        if (!el.checked) return;
+      if(!el.name) return;
+      if(el.type==='radio'){
+        if(!el.checked) return;
         data[el.name] = el.value;
       } else {
         data[el.name] = el.value;
       }
     });
+
+    // Supabaseへ挿入（失敗しても画面遷移は止めない）
+    try {
+      const payload = {
+        consent:             data.consent==='yes',
+        gender:              data.gender,
+        age:                 Number(data.age),
+        degree:              data.degree,
+        years_licensed:      Number(data.yearsLicensed),
+        specialty:           data.specialty,
+        knowledge_level:     Number(data.knowledgeLevel),
+        implementation_level:Number(data.implementationLevel),
+        environment_support: Number(data.environmentSupport),
+        responses: Object.entries(data)
+                         .filter(([k])=>/^q\d+$/.test(k))
+                         .reduce((o,[k,v])=>(o[k]=Number(v),o),{})
+      };
+      const { error } = await supabase
+        .from('ooo_responses')
+        .insert([payload]);
+      if(error) throw error;
+    } catch(err){
+      console.error('Supabase挿入エラー', err);
+    }
+
+    // sessionStorage保存＆結果画面へ
     sessionStorage.setItem('ooo_responses', JSON.stringify(data));
     window.location.href = 'result.html';
   });
 
-})();
+})();  
 </script>
+
 </body>
 </html>
 

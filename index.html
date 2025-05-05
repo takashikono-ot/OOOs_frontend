@@ -1164,36 +1164,37 @@
     </section>
   </form>
 
-<!-- ❶ ライブラリ読込はココで OK（フォームの後ろでも可） -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/index.min.js"></script>
+<!-- Supabase のクライアントを CDN から読み込む -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 (() => {
-  /* --- Supabase 初期化 --- */
-  const SUPABASE_URL  = 'https://wapsozrmlvyqlgeveomx.supabase.co';
-  const SUPABASE_ANONKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhcHNvenJtbHZ5cWxnZXZlb214Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzOTI2OTgsImV4cCI6MjA2MTk2ODY5OH0.4DrAI4mK4Xw17xqqqlYROqdJGX39hP68JCGMUVMD0hc';
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANONKEY);
+  // ── 1. 接続情報を定義 ──
+  const SUPABASE_URL     = 'https://wapsozrmlvyqlgeveomx.supabase.co';
+  const SUPABASE_ANONKEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhcHNvenJtbHZ5cWxnZXZlb214Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYzOTI2OTgsImV4cCI6MjA2MTk2ODY5OH0.4DrAI4mK4Xw17xqqqlYROqdJGX39hP68JCGMUVMD0hc';  // ← あなたの anon キー
 
-  /* --- DOM が組み上がったら実行 --- */
+  // ── 2. クライアントを作成 （グローバル名は "supabase"） ──
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANONKEY);
+
+  // ── 3. DOM が組み上がったらフォーム制御と送信処理をセット ──
   document.addEventListener('DOMContentLoaded', () => {
-  /* デフォルトで 1 点をチェック */
-  for (let i = 1; i <= 42; i++) {
-    const radio = document.querySelector(`input[name="q${i}"][value="1"]`);
-    if (radio) radio.checked = true;
-   }
+    // (a) デフォルトで１点をチェック
+    for (let i = 1; i <= 42; i++) {
+      const r = document.querySelector(`input[name="q${i}"][value="1"]`);
+      if (r) r.checked = true;
+    }
 
-    /* --- 多段フォームの制御 --- */
-    const form   = document.getElementById('ooo-form');
-    const steps  = [...document.querySelectorAll('.step')];
-    let   idx    = 0;
-    const show   = i => steps.forEach((s,j)=>s.classList.toggle('active', j===i));
+    // (b) 多段フォームの次へ／戻る
+    const form = document.getElementById('ooo-form');
+    const steps = [...document.querySelectorAll('.step')];
+    let idx = 0;
+    const show = i => steps.forEach((s,j)=> s.classList.toggle('active', j===i));
     show(idx);
-
     form.querySelectorAll('.next').forEach(btn =>
       btn.addEventListener('click', () => {
         const invalid = steps[idx].querySelector(':invalid');
-        if (invalid){ invalid.reportValidity(); return; }
-        if (idx < steps.length-1) idx++;
+        if (invalid) { invalid.reportValidity(); return; }
+        if (idx < steps.length - 1) idx++;
         show(idx);
       })
     );
@@ -1201,11 +1202,10 @@
       btn.addEventListener('click', () => { if (idx>0) idx--; show(idx); })
     );
 
-    /* --- 送信処理 --- */
+    // (c) 送信時に Supabase へ INSERT
     form.addEventListener('submit', async e => {
       e.preventDefault();
-
-      /* ① フォーム値を収集 */
+      // フォーム値を収集
       const data = {};
       [...form.elements].forEach(el => {
         if (!el.name) return;
@@ -1217,7 +1217,7 @@
         }
       });
 
-      /* ② ペイロード整形 */
+      // ペイロード整形
       const payload = {
         consent:             data.consent === 'yes',
         gender:              data.gender,
@@ -1230,10 +1230,10 @@
         environment_support: Number(data.environmentSupport),
         responses: Object.entries(data)
                          .filter(([k]) => /^q\d+$/.test(k))
-                         .reduce((o,[k,v]) => (o[k]=Number(v), o), {})
+                         .reduce((o,[k,v]) => (o[k] = Number(v), o), {})
       };
 
-      /* ③ Supabase に INSERT */
+      // Supabase に送信
       try {
         const { error } = await sb
           .from('ooo_responses')
@@ -1241,16 +1241,16 @@
         if (error) throw error;
       } catch (err) {
         console.error('Supabase 挿入エラー', err);
-        /* 失敗しても画面は遷移させる仕様 */
       }
 
-      /* ④ ローカル保存 & 遷移 */
+      // ローカル保存して画面遷移
       sessionStorage.setItem('ooo_responses', JSON.stringify(data));
       window.location.href = 'result.html';
     });
   });
 })();
 </script>
+
 </body>
 </html>
 

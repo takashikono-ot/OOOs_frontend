@@ -5,40 +5,177 @@
   <title>OOOs（オーズ）のホームページ</title>
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'M PLUS Rounded 1c', sans-serif; background-color: #f9f9f9; color: #333; text-align: center; padding: 50px 20px; line-height: 1.8; }
-    h1 { font-size: 2.5em; margin-bottom: 0.5em; color: #2c3e50; }
-    p { font-size: 1.2em; margin-bottom: 1.5em; }
-    .button { display: inline-block; background-color: #26466d; color: #fff; padding: 12px 24px; font-size: 1.2em; text-decoration: none; border-radius: 8px; transition: all 0.3s ease; }
-    .button:hover { background-color: #1e3755; transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); }
-    details { max-width: 800px; margin: 2em auto; text-align: left; background: #fff; border: 1px solid #ccc; border-radius: 10px; padding: 1.5em; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    summary { font-weight: bold; cursor: pointer; }
-    .ooos-image-wrapper { position: fixed; bottom: 75px; right: 110px; width: 180px; height: 180px; z-index: 10; }
-    .ooos-image { position: absolute; width: 100%; height: 100%; object-fit: contain; transition: opacity 0.3s ease; }
-    .ooos-image.waving { opacity: 0; pointer-events: none; }
-    .ooos-image-wrapper:hover .waving { opacity: 1; }
-    .ooos-image-wrapper:hover .default { opacity: 0; }
-  </style>
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      text-align: center;
+      padding: 50px 20px;
+      line-height: 1.8;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 0.5em;
+      color: #2c3e50;
+    }
+
+    p {
+      font-size: 1.2em;
+      margin-bottom: 1.5em;
+    }
+
+    a.button {
+      display: inline-block;
+      background-color: #26466d;
+      color: #fff;
+      padding: 12px 24px;
+      font-size: 1.2em;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+    }
+
+    a.button:hover {
+      background-color: #1e3755;
+    }
+
+    details {
+      max-width: 800px;
+      margin: 2em auto;
+      text-align: left;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      padding: 1.5em;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    details summary {
+      font-weight: bold;
+      font-size: 1.1em;
+      cursor: pointer;
+      margin-bottom: 1em;
+    }
+
+    ul {
+      padding-left: 1.5em;
+    }
+
+   /* OOOsをやってみるボタン */
+a.button {
+  display: inline-block;
+  background-color: #26466d;
+  color: #fff;
+  padding: 12px 24px;
+  font-size: 1.2em;
+  text-decoration: none;
+  border-radius: 8px;
+  /* 追加：トランジションを拡張 */
+  transition: background-color 0.3s ease,
+              transform 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+a.button:hover {
+  /* 背景色の変化（もともとの設定） */
+  background-color: #1e3755;
+  /* 追加：わずかに持ち上げる */
+  transform: translateY(-3px);
+  /* 追加：影を強めて浮遊感を演出 */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+
+/* オーズくん画像を右下に表示 */
+.ooos-image-wrapper {
+  position: fixed;
+  bottom: 75px;
+  right: 110px;
+  width: 180px;      /* ← 幅を統一 */
+  height: 180px;     /* ← 高さも明示 */
+  z-index: 10;
+}
+
+.ooos-image {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* ← 画像を枠内にフィットさせる */
+  transition: opacity 0.3s ease;
+}
+
+.ooos-image.waving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ooos-image-wrapper:hover .waving {
+  opacity: 1;
+}
+
+.ooos-image-wrapper:hover .default {
+  opacity: 0;
+}
+
+
+</style>
 </head>
 <body>
   <h1>ようこそ！</h1>
-  <p>このページではOOOs（オーズ）をおこなって、診断ができます。</p>
+  <p>このページではOOOs（オーズ）をおこなって、潜在ランクの確認ができます。</p>
 
   <details>
     <summary> OOOsとは？</summary>
-    <p>OOOsは、作業中心・作業焦点・作業基盤実践尺度（Occupation-Centered, Occupation-Focused, and Occupation-Based Practice Scale）のことです。作業療法士がOCP・OFP・OBPを行うスキルを調べるために作りました。</p>
+    <p>OOOsは、作業中心・作業焦点・作業基盤実践尺度（Occupation-Centered, Occupation-Focused, and Occupation-Based Practice Scale）のことです。</p>
+    <p>作業中心実践（Occupation-Centered Practice：OCP）、作業焦点実践（Occupation-Focused Practice：OFP）、作業基盤実践（Occupation-Based Practice：OBP）を行う知識やスキルがどのくらいかを調べるために作りました。</p>
+    <p>この尺度におけるOCP・OFP・OBPの定義は以下のように考えています。</p>
+    <ul>
+      <li><strong>OCP：</strong> クライエントが作業的存在であるという視座に基づき、すべての作業療法過程において作業に焦点を当て活用する作業療法士の視点のことです。</li>
+      <li><strong>OFP：</strong> 評価と介入の直接的・即時的な焦点が作業遂行・作業経験といった作業に向いている状態のことです。</li>
+      <li><strong>OBP：</strong> 評価と介入で実際の意味ある作業に取り組むことを主な手段とする実践のことです。</li>
+    </ul>
+    <p>またOOOsに応えて、潜在ランク診断を行うことで、次にどのような知識やスキルを身に付けたらOCP・OFP・OBPが上手になるかがわかります。</p>
+    <p>是非、試してみてください。</p>
   </details>
 
+  <details>
+  <summary>お願いと手順について</summary>
+  <p>この度は、OOOs（Occupation-Centered, Occupation-Focused, and Occupation-Based Practice Scale）にご興味を持っていただき、ありがとうございます。</p>
+  <p>この「OOOs潜在ランクチェック」でご回答いただいたデータは、研究への活用や潜在ランク推定の精度を高めるために使わせていただけると大変ありがたいです。</p>
+
+  <p><strong>① 研究利用へのご協力について</strong><br>
+  「OOOsをやってみる」ボタンを押したあとに、研究利用に関するご確認の画面が表示されます。  
+  「はい」または「いいえ」をお選びください。  
+  もちろん、「データは使ってほしくないな」と思われた場合は「いいえ」を選んでいただいて大丈夫です。その場合、ご入力いただいたデータは使用せず、削除します。</p>
+
+  <p><strong>② 作業療法に関する簡単な質問</strong><br>
+  OOOsは、作業療法士の方の実践を想定した内容になっています。  
+  そのため、経験年数や現在どのような領域で仕事をしているかなど、簡単な質問にもお答えいただきます。</p>
+
+  <p><strong>③ OOOsの質問について</strong><br>
+  続いて、25個の質問項目にご回答いただきます。  
+  これは、作業中心実践（OCP）・作業焦点実践（OFP）・作業基盤実践（OBP）の3つの視点に関する自己評価です。</p>
+
+  <p><strong>④ 結果の確認</strong><br>
+  最後に「結果を見る」ボタンを押すと、各得点と推定された潜在ランク（今は環境を構築中です！！）をご確認いただけます。</p>
+</details>
+
   <div class="button-container">
-    <a href="app.html" class="button">OOOsをやってみる</a>
+    <a href="https://ooos-frontend.netlify.app" class="button" target="_blank" rel="noopener">
+      OOOsをやってみる
+    </a>
   </div>
-
-  <div class="ooos-image-wrapper">
-    <img src="./ほほえみオーズくん3.png" alt="オーズくん" class="ooos-image default">
-    <img src="./OOOSくんwave_gif用_透過.gif" alt="オーズくん手ふり" class="ooos-image waving">
-  </div>
-
-  <footer>
-    <p style="font-size:0.9em; color:#888; margin-top:5em;">© 2026 河野 崇　✉ onogoroman@gmail.com</p>
+<div class="ooos-image-wrapper">
+  <img src="./ほほえみオーズくん3.png" alt="オーズくん" class="ooos-image default">
+  <img src="./OOOSくんwave_gif用_透過.gif" alt="オーズくん手ふり" class="ooos-image waving">
+</div>
+<footer>
+    <p style="font-size:1.0em; color:#888; text-align:center; margin-top:3em;">
+      © 2026 河野 崇（Takashi Kono）　✉ onogoroman@gmail.com
+    </p>
   </footer>
 </body>
 </html>
+

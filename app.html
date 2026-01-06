@@ -9,9 +9,8 @@
     body { font-family: 'M PLUS Rounded 1c', sans-serif; max-width:800px; margin:auto; padding:20px; background-color: #f4f7f9; }
     h1 { text-align:center; color: #26466d; }
     
-    /* ステップ（画面）のスタイル */
+    /* 画面切り替え用のスタイル */
     .step-section { display: none; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    /* activeクラスがついているものだけ表示 */
     .step-section.active { display: block; }
     
     h3 { margin-top: 2em; padding: 0.5em; background-color: #26466d; color: #fff; border-radius: 6px; text-align: center; }
@@ -83,9 +82,7 @@
   </form>
 
 <script>
-  // --------------------------------------------------
-  // 1. 質問データ定義
-  // --------------------------------------------------
+  // 1. 質問データ
   const oooQuestions = [
     { id: 1, cat: "OCP", text: "クライエントが生きるうえで、作業がなぜ必要か説明できる" },
     { id: 2, cat: "OCP", text: "クライエントの健康・幸福のために、作業がなぜ必要か説明できる" },
@@ -111,4 +108,131 @@
     { id: 22, cat: "OBP", text: "クライエントが実際に作業に取り組むことを通して、自己認識（アイデンティティや成長の実感）の構築を支援できる" },
     { id: 23, cat: "OBP", text: "クライエントが居場所を手にいれるため、実際に作業に取り組むことを通して支援できる" },
     { id: 24, cat: "OBP", text: "クライエントの課題解決のために、なじみのある実際の生活環境で直接作業を用いた介入ができる" },
-    { id: 25, cat: "OBP", text: "クライエントのなじみのある生活
+    { id: 25, cat: "OBP", text: "クライエントのなじみのある生活環境で介入が困難な場合、可能な限り類似した環境で直接作業を用いた介入ができる" }
+  ];
+
+  // 2. 質問画面生成
+  const qArea = document.getElementById('questions-area');
+  let lastCat = "";
+  oooQuestions.forEach(q => {
+    if(q.cat !== lastCat){
+      const h3 = document.createElement('h3');
+      h3.innerText = q.cat === "OCP" ? "作業中心実践 (OCP)" : (q.cat === "OFP" ? "作業焦点実践 (OFP)" : "作業基盤実践 (OBP)");
+      qArea.appendChild(h3);
+      lastCat = q.cat;
+    }
+    const div = document.createElement('div');
+    div.className = 'question';
+    div.innerHTML = `
+      <label class="q-label">【${q.id}】 ${q.text}</label>
+      <div class="option-group">
+        ${[1,2,3,4,5,6].map(v => 
+          `<div class="option-item"><label><input type="radio" name="q${q.id}" value="${v}"><br>${v}</label></div>`
+        ).join('')}
+      </div>`;
+    qArea.appendChild(div);
+  });
+
+  // 3. 画面遷移処理
+  const step1 = document.getElementById('step1');
+  const step2 = document.getElementById('step2');
+  const step3 = document.getElementById('step3');
+  
+  // ▼同意画面の「次へ」
+  document.getElementById('btn-go-to-2').addEventListener('click', function() {
+    const consent = document.querySelector('input[name="consent"]:checked');
+    if (!consent) {
+      document.getElementById('error1').style.display = 'block';
+      alert("同意するかどうかを選択してください");
+      return;
+    }
+    document.getElementById('error1').style.display = 'none';
+    step1.classList.remove('active');
+    step2.classList.add('active');
+    window.scrollTo(0,0);
+  });
+
+  // ▼プロフィールの「戻る」
+  document.getElementById('btn-back-to-1').addEventListener('click', function() {
+    step2.classList.remove('active');
+    step1.classList.add('active');
+    window.scrollTo(0,0);
+  });
+
+  // ▼プロフィールの「次へ」
+  document.getElementById('btn-go-to-3').addEventListener('click', function() {
+    const gender = document.getElementById('inp-gender').value;
+    const age = document.getElementById('inp-age').value;
+    const degree = document.getElementById('inp-degree').value;
+    const years = document.getElementById('inp-years').value;
+    const specialty = document.getElementById('inp-specialty').value;
+
+    if (!gender || !age || !degree || !years || !specialty) {
+      document.getElementById('error2').style.display = 'block';
+      alert("プロフィールのすべての項目を入力してください");
+      return;
+    }
+    document.getElementById('error2').style.display = 'none';
+    step2.classList.remove('active');
+    step3.classList.add('active');
+    window.scrollTo(0,0);
+  });
+
+  // ▼アンケートの「戻る」
+  document.getElementById('btn-back-to-2').addEventListener('click', function() {
+    step3.classList.remove('active');
+    step2.classList.add('active');
+    window.scrollTo(0,0);
+  });
+
+  // 4. 送信処理
+  document.getElementById('ooo-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(document.getElementById('ooo-form'));
+    const data = Object.fromEntries(formData.entries());
+    let allAnswered = true;
+    for(let i=1; i<=25; i++) { if(!data["q"+i]) allAnswered = false; }
+
+    if(!allAnswered) {
+      document.getElementById('error3').style.display = 'block';
+      alert("未回答の項目があります。");
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerText = "送信中...";
+
+    // 先生のGAS URL
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxhbR8pr3oiqYcyUAmU29ST7ffeHlc1JuzTUSY6WptS3eLlU7JRXitSW70jaBobOBb8tg/exec";
+
+    let ocp=0, ofp=0, obp=0;
+    oooQuestions.forEach(q => {
+      const v = Number(data[`q${q.id}`]);
+      if(q.cat==="OCP") ocp+=v; else if(q.cat==="OFP") ofp+=v; else obp+=v;
+    });
+
+    const payload = {
+      consent: data.consent === 'yes',
+      gender: data.gender,
+      age: Number(data.age),
+      degree: data.degree,
+      years_licensed: Number(data.yearsLicensed),
+      specialty: data.specialty,
+      ocp_score: ocp, ofp_score: ofp, obp_score: obp, total_score: ocp+ofp+obp,
+      responses: data
+    };
+
+    try {
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+      sessionStorage.setItem('ooo_result', JSON.stringify(payload));
+      window.location.href = 'result.html';
+    } catch(err) {
+      alert("送信エラーが発生しました。");
+      btn.disabled = false;
+      btn.innerText = "結果を見る";
+    }
+  });
+</script>
+</body>
+</html>

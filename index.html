@@ -1,172 +1,44 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>OOOs 潜在ランクチェック</title>
+  <meta charset="UTF-8">
+  <title>OOOs（オーズ）のホームページ</title>
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet">
   <style>
-    /* 先生のスタイルを継承しつつ、6件法の見栄えを調整 */
-    body { font-family: 'M PLUS Rounded 1c', sans-serif; max-width:800px; margin:auto; padding:20px; background-color: #f9f9f9; }
-    h1 { text-align:center; color: #26466d; }
-    .step { display: none; background: white; padding: 20px; border-radius: 12px; shadow: 0 2px 10px rgba(0,0,0,0.05); }
-    .step.active { display: block; }
-    h3 { font-size: 1.4em; margin: 2em 0 1em; padding: 0.5em; background-color: #26466d; color: #fff; border-radius: 6px; text-align: center; }
-    .question { margin: 2em 0; padding-bottom: 1.5em; border-bottom: 1px solid #eee; }
-    .q-label { font-weight: bold; display: block; margin-bottom: 1em; line-height: 1.6; }
-    .controls { text-align: center; margin-top: 2em; }
-    button { background-color: #26466d; color: #fff; border: none; border-radius: 4px; padding: 12px 24px; cursor: pointer; transition: all 0.3s; }
-    button:hover { background-color: #1e3755; transform: translateY(-2px); }
-    .option-group { display: flex; justify-content: space-between; align-items: center; }
-    .option-item { text-align: center; flex: 1; }
-    select, input[type="number"] { padding: 8px; border-radius: 4px; border: 1px solid #ccc; }
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; background-color: #f9f9f9; color: #333; text-align: center; padding: 50px 20px; line-height: 1.8; }
+    h1 { font-size: 2.5em; margin-bottom: 0.5em; color: #2c3e50; }
+    p { font-size: 1.2em; margin-bottom: 1.5em; }
+    .button { display: inline-block; background-color: #26466d; color: #fff; padding: 12px 24px; font-size: 1.2em; text-decoration: none; border-radius: 8px; transition: all 0.3s ease; }
+    .button:hover { background-color: #1e3755; transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); }
+    details { max-width: 800px; margin: 2em auto; text-align: left; background: #fff; border: 1px solid #ccc; border-radius: 10px; padding: 1.5em; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    summary { font-weight: bold; cursor: pointer; }
+    .ooos-image-wrapper { position: fixed; bottom: 75px; right: 110px; width: 180px; height: 180px; z-index: 10; }
+    .ooos-image { position: absolute; width: 100%; height: 100%; object-fit: contain; transition: opacity 0.3s ease; }
+    .ooos-image.waving { opacity: 0; pointer-events: none; }
+    .ooos-image-wrapper:hover .waving { opacity: 1; }
+    .ooos-image-wrapper:hover .default { opacity: 0; }
   </style>
 </head>
 <body>
-  <h1>OOOs 潜在ランクチェック</h1>
+  <h1>ようこそ！</h1>
+  <p>このページではOOOs（オーズ）をおこなって、診断ができます。</p>
 
-  <form id="ooo-form">
-    <section class="step active" data-step="1">
-      <h2>研究利用の同意</h2>
-      <p>この調査で得られたデータは、個人が特定されない形で研究や精度向上のために利用させていただく場合があります。</p>
-      <label><input type="radio" name="consent" value="yes" required> はい、同意します</label><br>
-      <label><input type="radio" name="consent" value="no"> いいえ、同意しません（結果表示のみ行います）</label>
-      <div class="controls"><button type="button" class="next-btn">次へ</button></div>
-    </section>
+  <details>
+    <summary> OOOsとは？</summary>
+    <p>OOOsは、作業中心・作業焦点・作業基盤実践尺度（Occupation-Centered, Occupation-Focused, and Occupation-Based Practice Scale）のことです。作業療法士がOCP・OFP・OBPを行うスキルを調べるために作りました。</p>
+  </details>
 
-    <section class="step" data-step="2">
-      <h2>回答者プロフィール</h2>
-      <div style="margin-bottom:1em;">
-        <label>性別：<select name="gender" required><option value="">選択</option><option value="男性">男性</option><option value="女性">女性</option><option value="その他">その他</option></select></label>
-      </div>
-      <div style="margin-bottom:1em;">
-        <label>年齢：<input type="number" name="age" min="18" max="100" required> 歳</label>
-      </div>
-      <div style="margin-bottom:1em;">
-        <label>取得している学位：
-          <select name="degree" required>
-            <option value="">選択</option>
-            <option value="短期大学士">短期大学士</option><option value="専門士">専門士/高度専門士</option>
-            <option value="学士">学士</option><option value="修士">修士</option><option value="博士">博士</option>
-          </select>
-        </label>
-      </div>
-      <div style="margin-bottom:1em;">
-        <label>経験年数：<input type="number" name="yearsLicensed" min="0" required> 年目</label>
-      </div>
-      <div style="margin-bottom:1em;">
-        <label>専門領域：<select name="specialty" required><option value="">選択</option><option value="身体">身体障害</option><option value="精神">精神障害</option><option value="発達">発達障害</option><option value="老年">老年期障害</option><option value="その他">その他</option></select></label>
-      </div>
-      <div class="controls">
-        <button type="button" class="prev-btn">戻る</button>
-        <button type="button" class="next-btn">質問回答へ</button>
-      </div>
-    </section>
+  <div class="button-container">
+    <a href="app.html" class="button">OOOsをやってみる</a>
+  </div>
 
-    <section class="step" data-step="3">
-      <div id="questions-area"></div>
-      <div class="controls">
-        <button type="button" class="prev-btn">戻る</button>
-        <button type="submit" id="submit">結果を見る</button>
-      </div>
-    </section>
-  </form>
+  <div class="ooos-image-wrapper">
+    <img src="./ほほえみオーズくん3.png" alt="オーズくん" class="ooos-image default">
+    <img src="./OOOSくんwave_gif用_透過.gif" alt="オーズくん手ふり" class="ooos-image waving">
+  </div>
 
-  <script>
-    const oooQuestions = [
-      { id: 1,  cat: "OCP", text: "クライエントが生きるうえで、作業がなぜ必要か説明できる" },
-      { id: 2,  cat: "OCP", text: "クライエントの健康・幸福のために、作業がなぜ必要か説明できる" },
-      { id: 3,  cat: "OCP", text: "クライエントにとって、作業の意味や価値の重要性を解釈できる" },
-      { id: 4,  cat: "OCP", text: "クライエントの作業に関する物理的・社会的環境の側面を認識できる" },
-      { id: 5,  cat: "OCP", text: "クライエントの作業が、文化的背景や社会的規範によってどのように形作られているか理解できる" },
-      { id: 6,  cat: "OCP", text: "クライエントの作業の過去・現在・未来の連続性を解釈できる" },
-      { id: 7,  cat: "OCP", text: "クライエントの作業に関する課題に対し、作業の視点を主軸に据え、多様なリーズニングを使い分けて方針を決定できる" },
-      { id: 8,  cat: "OCP", text: "クライエントが直面する課題を、身体機能や精神機能だけでなく、作業との関連で捉えることができる" },
-      { id: 9,  cat: "OFP", text: "クライエントにとって意味のある作業を特定できる" },
-      { id: 10, cat: "OFP", text: "クライエントの作業に対する主観的な経験（重要度、実行度など）を評価できる" },
-      { id: 11, cat: "OFP", text: "クライエントの現在の役割や習慣が作業に与える影響を評価し、介入計画を立案できる" },
-      { id: 12, cat: "OFP", text: "クライエントの現在の作業に関する課題を明確にすることができる" },
-      { id: 13, cat: "OFP", text: "クライエントと協働し、作業に関する目標を設定できる" },
-      { id: 14, cat: "OFP", text: "クライエントの作業に関する目標に対し、達成度を継続的に評価することができる" },
-      { id: 15, cat: "OFP", text: "クライエントに作業の意味や価値への気づきを促すことができる" },
-      { id: 16, cat: "OFP", text: "クライエントの作業への参加を促進するため、周囲の理解を深め、支援的な環境を整えることができる" },
-      { id: 17, cat: "OBP", text: "クライエントが実際に行う作業の質を、観察評価できる" },
-      { id: 18, cat: "OBP", text: "クライエントが実際に行う作業を観察し、人・環境・作業の相互関係を分析できる" },
-      { id: 19, cat: "OBP", text: "クライエントに合う作業を見つけるため、実際の作業を試すことができる" },
-      { id: 20, cat: "OBP", text: "クライエントの作業に関する課題を解決するために、作業の難易度を段階づけることができる" },
-      { id: 21, cat: "OBP", text: "クライエントが実際の作業を行う過程で、手本・介助・助言や問いかけを使い分け、最適なやり方の習得を支援できる" },
-      { id: 22, cat: "OBP", text: "クライエントが実際に作業に取り組むことを通して、自己認識（アイデンティティや成長の実感）の構築を支援できる" },
-      { id: 23, cat: "OBP", text: "クライエントが居場所を手にいれるため、実際に作業に取り組むことを通して支援できる" },
-      { id: 24, cat: "OBP", text: "クライエントの課題解決のために、なじみのある実際の生活環境で直接作業を用いた介入ができる" },
-      { id: 25, cat: "OBP", text: "クライエントのなじみのある生活環境で介入が困難な場合、可能な限り類似した環境で直接作業を用いた介入ができる" }
-    ];
-
-    const form = document.getElementById('ooo-form');
-    const questionsArea = document.getElementById('questions-area');
-    let currentCat = "";
-
-    // 質問の自動生成
-    oooQuestions.forEach(q => {
-      if (q.cat !== currentCat) {
-        const h3 = document.createElement('h3');
-        h3.innerText = q.cat === "OCP" ? "作業中心実践（OCP）" : (q.cat === "OFP" ? "作業焦点実践（OFP）" : "作業基盤実践（OBP）");
-        questionsArea.appendChild(h3);
-        currentCat = q.cat;
-      }
-      const div = document.createElement('div');
-      div.className = 'question';
-      div.innerHTML = `
-        <label class="q-label">【${q.id}】 ${q.text}</label>
-        <div class="option-group">
-          ${[1, 2, 3, 4, 5, 6].map(v => `<label><input type="radio" name="q${q.id}" value="${v}" required><br>${v}</label>`).join('')}
-        </div>
-      `;
-      questionsArea.appendChild(div);
-    });
-
-    // ステップ切り替えロジック
-    let currentStep = 0;
-    const steps = document.querySelectorAll('.step');
-    const updateSteps = () => {
-      steps.forEach((s, i) => s.classList.toggle('active', i === currentStep));
-      window.scrollTo(0,0);
-    };
-
-    document.querySelectorAll('.next-btn').forEach(btn => btn.addEventListener('click', () => {
-      if(form.checkValidity()) { currentStep++; updateSteps(); } 
-      else { form.reportValidity(); }
-    }));
-    document.querySelectorAll('.prev-btn').forEach(btn => btn.addEventListener('click', () => {
-      currentStep--; updateSteps();
-    }));
-
-    // 送信処理
-    form.addEventListener('submit', async e => {
-      e.preventDefault();
-      const data = Object.fromEntries(new FormData(form));
-      const GAS_URL = "https://script.google.com/macros/s/AKfycbxhbR8pr3oiqYcyUAmU29ST7ffeHlc1JuzTUSY6WptS3eLlU7JRXitSW70jaBobOBb8tg/exec";
-
-      let ocp=0, ofp=0, obp=0;
-      oooQuestions.forEach(q => {
-        const val = Number(data[`q${q.id}`]);
-        if(q.cat==="OCP") ocp+=val; else if(q.cat==="OFP") ofp+=val; else obp+=val;
-      });
-
-      const payload = {
-        consent: data.consent === 'yes',
-        gender: data.gender, age: Number(data.age), degree: data.degree,
-        years_licensed: Number(data.yearsLicensed), specialty: data.specialty,
-        ocp_score: ocp, ofp_score: ofp, obp_score: obp, total_score: ocp+ofp+obp,
-        rank: (ocp+ofp+obp) >= 120 ? "ランクS" : "ランクA", // 暫定
-        responses: data
-      };
-
-      try {
-        await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
-        sessionStorage.setItem('ooo_result', JSON.stringify(payload));
-        window.location.href = 'result.html';
-      } catch (err) { alert("送信失敗"); }
-    });
-  </script>
+  <footer>
+    <p style="font-size:0.9em; color:#888; margin-top:5em;">© 2026 河野 崇　✉ onogoroman@gmail.com</p>
+  </footer>
 </body>
 </html>

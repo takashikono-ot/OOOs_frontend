@@ -2,44 +2,194 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>OOOs 診断結果</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>OOOsの結果発表</title>
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: 'M PLUS Rounded 1c', sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #f9f9f9; text-align: center; }
-    .card { background: white; padding: 30px; border-radius: 15px; shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    h1 { color: #26466d; }
-    .rank-box { background: #fff8e1; border: 2px dashed #ffa000; padding: 15px; margin: 20px 0; font-weight: bold; }
-    .chart-container { width: 100%; height: 300px; margin-top: 20px; }
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; max-width: 800px; margin: auto; padding: 20px; background-color: #f9f9f9; text-align: center; color: #333; }
+    .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    h1 { color: #26466d; margin-bottom: 20px; }
+    h2 { color: #26466d; border-bottom: 2px solid #26466d; padding-bottom: 10px; margin-top: 40px; margin-bottom: 20px; text-align: left; }
+    
+    /* 得点表示エリア */
+    .score-container { margin-bottom: 20px; }
+    .total-score { font-size: 1.4em; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+    .total-val { font-size: 1.8em; color: #26466d; }
+    
+    .sub-scores { display: flex; justify-content: space-around; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 0.9em; }
+    .sub-item strong { display: block; color: #26466d; font-size: 1.1em; margin-bottom: 5px; }
+    
+    /* チャートエリア */
+    .chart-container { 
+      position: relative; 
+      width: 100%; 
+      height: 400px; 
+      margin: 20px auto; 
+    }
+    
+    /* 回答一覧リスト */
+    .answer-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; text-align: left; }
+    .answer-table th { background: #26466d; color: white; padding: 10px; text-align: center; }
+    .answer-table td { border-bottom: 1px solid #ddd; padding: 10px; }
+    .answer-table tr:nth-child(even) { background-color: #f9f9f9; }
+    .ans-num { font-weight: bold; color: #26466d; text-align: center; width: 50px; }
+    .ans-val { font-weight: bold; font-size: 1.1em; text-align: center; width: 60px; }
+    
+    /* ランク判定ボックス */
+    .rank-box { background: #fff8e1; border: 3px dashed #ffa000; padding: 20px; margin: 30px 0; border-radius: 10px; }
+    .rank-title { font-weight: bold; display: block; margin-bottom: 10px; font-size: 1.1em; }
+    
+    .btn { display: inline-block; background: #26466d; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; transition: 0.3s; font-weight: bold; margin-top: 20px; }
+    .btn:hover { background: #1e3755; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>診断結果</h1>
-    <div class="rank-box">
-      潜在ランク判定：<br><span style="font-size: 1.5em; color: #e67e22;">🛠️ いま構築中</span>
+
+<div class="card">
+  <h1>診断結果</h1>
+
+  <div class="score-container">
+    <div class="total-score">
+      合計得点: <span class="total-val" id="totalScore">0</span> <span style="font-size:0.7em; color:#888;">/ 150</span>
     </div>
-    <p>合計点: <span id="total" style="font-size: 1.5em; font-weight: bold;">0</span> / 150</p>
-    <div class="chart-container"><canvas id="radar"></canvas></div>
-    <button onclick="location.href='index.html'" style="margin-top:20px; padding:10px 20px; background:#26466d; color:#fff; border:none; border-radius:4px; cursor:pointer;">トップへ戻る</button>
+    <div class="sub-scores">
+      <div class="sub-item"><strong>OCP</strong><span id="ocpVal">0</span> / 48</div>
+      <div class="sub-item"><strong>OFP</strong><span id="ofpVal">0</span> / 48</div>
+      <div class="sub-item"><strong>OBP</strong><span id="obpVal">0</span> / 54</div>
+    </div>
   </div>
 
+  <div class="chart-container">
+    <canvas id="oooChart"></canvas>
+  </div>
+  
+  <div class="rank-box">
+    <span class="rank-title">あなたの潜在ランク判定</span>
+    <span style="font-size: 1.8em; color: #e67e22; font-weight:bold;">🛠️ いま構築中</span>
+    <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
+      ※現在、多くのデータを集めて推定ロジックを作成しています。
+    </p>
+  </div>
+
+  <h2>あなたの回答一覧</h2>
+  <table class="answer-table">
+    <thead>
+      <tr>
+        <th>No.</th>
+        <th>質問項目</th>
+        <th>回答</th>
+      </tr>
+    </thead>
+    <tbody id="answer-list-body">
+      </tbody>
+  </table>
+
+  <a href="index.html" class="btn">トップへ戻る</a>
+</div>
+
 <script>
+  // 保存された結果を取得
   const res = JSON.parse(sessionStorage.getItem('ooo_result'));
-  if(!res) { location.href='index.html'; }
-  document.getElementById('total').innerText = res.total_score;
 
-  // 100点換算（OCP/OFPは48点、OBPは54点が満点）
-  const data = [ (res.ocp_score/48)*100, (res.ofp_score/48)*100, (res.obp_score/54)*100 ];
+  if (!res) {
+    alert("データが見つかりませんでした。最初からやり直してください。");
+    location.href = 'index.html';
+  }
 
-  new Chart(document.getElementById('radar'), {
+  // --- 得点表示 ---
+  document.getElementById('totalScore').innerText = res.total_score;
+  document.getElementById('ocpVal').innerText = res.ocp_score;
+  document.getElementById('ofpVal').innerText = res.ofp_score;
+  document.getElementById('obpVal').innerText = res.obp_score;
+
+  // --- レーダーチャート ---
+  const ocpRate = (res.ocp_score / 48) * 100;
+  const ofpRate = (res.ofp_score / 48) * 100;
+  const obpRate = (res.obp_score / 54) * 100;
+
+  const ctx = document.getElementById('oooChart').getContext('2d');
+  new Chart(ctx, {
     type: 'radar',
     data: {
       labels: ['OCP (作業中心)', 'OFP (作業焦点)', 'OBP (作業基盤)'],
-      datasets: [{ data: data, backgroundColor: 'rgba(38,70,109,0.2)', borderColor: '#26466d', borderWidth: 2 }]
+      datasets: [{
+        label: 'スコア',
+        data: [ocpRate, ofpRate, obpRate],
+        backgroundColor: 'rgba(38, 70, 109, 0.2)',
+        borderColor: '#26466d',
+        borderWidth: 3,
+        pointBackgroundColor: '#fff',
+        pointBorderColor: '#26466d',
+        pointRadius: 5
+      }]
     },
-    options: { scales: { r: { suggestedMin: 0, suggestedMax: 100 } }, plugins: { legend: { display: false } } }
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          suggestedMin: 0,
+          suggestedMax: 100,
+          ticks: { display: false }, /* 100分の記載を消す */
+          pointLabels: {
+            font: { size: 14, weight: 'bold', family: "'M PLUS Rounded 1c', sans-serif" },
+            color: '#26466d'
+          }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false } /* ツールチップもシンプルに消す */
+      }
+    }
   });
+
+  // --- 回答一覧の生成 ---
+  // 質問文データ（index.htmlと同じもの）
+  const oooQuestions = [
+    { id: 1, text: "クライエントが生きるうえで、作業がなぜ必要か説明できる" },
+    { id: 2, text: "クライエントの健康・幸福のために、作業がなぜ必要か説明できる" },
+    { id: 3, text: "クライエントにとって、作業の意味や価値の重要性を解釈できる" },
+    { id: 4, text: "クライエントの作業に関する物理的・社会的環境の側面を認識できる" },
+    { id: 5, text: "クライエントの作業が、文化的背景や社会的規範によってどのように形作られているか理解できる" },
+    { id: 6, text: "クライエントの作業の過去・現在・未来の連続性を解釈できる" },
+    { id: 7, text: "クライエントの作業に関する課題に対し、作業の視点を主軸に据え、多様なリーズニングを使い分けて方針を決定できる" },
+    { id: 8, text: "クライエントが直面する課題を、身体機能や精神機能だけでなく、作業との関連で捉えることができる" },
+    { id: 9, text: "クライエントにとって意味のある作業を特定できる" },
+    { id: 10, text: "クライエントの作業に対する主観的な経験（重要度、実行度など）を評価できる" },
+    { id: 11, text: "クライエントの現在の役割や習慣が作業に与える影響を評価し、介入計画を立案できる" },
+    { id: 12, text: "クライエントの現在の作業に関する課題を明確にすることができる" },
+    { id: 13, text: "クライエントと協働し、作業に関する目標を設定できる" },
+    { id: 14, text: "クライエントの作業に関する目標に対し、達成度を継続的に評価することができる" },
+    { id: 15, text: "クライエントに作業の意味や価値への気づきを促すことができる" },
+    { id: 16, text: "クライエントの作業への参加を促進するため、周囲の理解を深め、支援的な環境を整えることができる" },
+    { id: 17, text: "クライエントが実際に行う作業の質を、観察評価できる" },
+    { id: 18, text: "クライエントが実際に行う作業を観察し、人・環境・作業の相互関係を分析できる" },
+    { id: 19, text: "クライエントに合う作業を見つけるため、実際の作業を試すことができる" },
+    { id: 20, text: "クライエントの作業に関する課題を解決するために、作業の難易度を段階づけることができる" },
+    { id: 21, text: "クライエントが実際の作業を行う過程で、手本・介助・助言や問いかけを使い分け、最適なやり方の習得を支援できる" },
+    { id: 22, text: "クライエントが実際に作業に取り組むことを通して、自己認識（アイデンティティや成長の実感）の構築を支援できる" },
+    { id: 23, text: "クライエントが居場所を手にいれるため、実際に作業に取り組むことを通して支援できる" },
+    { id: 24, text: "クライエントの課題解決のために、なじみのある実際の生活環境で直接作業を用いた介入ができる" },
+    { id: 25, text: "クライエントのなじみのある生活環境で介入が困難な場合、可能な限り類似した環境で直接作業を用いた介入ができる" }
+  ];
+
+  const tbody = document.getElementById('answer-list-body');
+  oooQuestions.forEach(q => {
+    const tr = document.createElement('tr');
+    // sessionStorageに保存された回答データ(q1, q2...)を取得
+    const val = res.responses['q' + q.id];
+    
+    tr.innerHTML = `
+      <td class="ans-num">${q.id}</td>
+      <td>${q.text}</td>
+      <td class="ans-val">${val}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
 </script>
+
 </body>
 </html>

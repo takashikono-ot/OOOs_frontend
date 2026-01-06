@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>OOOs 潜在ランクチェック</title>
+  <title>OOOsチェック</title>
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet">
   <style>
     /* 基本設定 */
@@ -102,7 +102,7 @@
   
   <div id="progress-container"><div id="progress-bar"></div></div>
 
-  <h1>OOOs 潜在ランクチェック</h1>
+  <h1>OOOs チェック</h1>
   
   <form id="ooo-form">
     
@@ -259,7 +259,7 @@
     document.getElementById('progress-bar').style.width = percent + "%";
   }
 
-  // ★数値入力の＋−ボタン制御
+  // 数値入力の＋−ボタン制御
   window.changeVal = function(id, amount) {
     const input = document.getElementById(id);
     let val = parseInt(input.value);
@@ -283,7 +283,7 @@
   const step2 = document.getElementById('step2');
   const step3 = document.getElementById('step3');
   
-  // ★修正: Step1 -> ホームページへ戻る (Netlifyの正しいURLへ変更)
+  //  Step1 -> ホームページへ戻る (Netlifyの正しいURLへ変更)
   document.getElementById('btn-back-to-home').addEventListener('click', function() {
     window.location.href = 'https://ooos-toppage.netlify.app/';
   });

@@ -58,7 +58,7 @@
   </form>
 
 <script>
-  // 1. 質問リストの定義
+  // 1. 質問リストの定義（25項目）
   const oooQuestions = [
     { id: 1, cat: "OCP", text: "クライエントが生きるうえで、作業がなぜ必要か説明できる" },
     { id: 2, cat: "OCP", text: "クライエントの健康・幸福のために、作業がなぜ必要か説明できる" },
@@ -93,7 +93,7 @@
   oooQuestions.forEach(q => {
     if(q.cat !== lastCat){
       const h3 = document.createElement('h3');
-      h3.innerText = q.cat;
+      h3.innerText = q.cat === "OCP" ? "作業中心実践 (OCP)" : (q.cat === "OFP" ? "作業焦点実践 (OFP)" : "作業基盤実践 (OBP)");
       qArea.appendChild(h3);
       lastCat = q.cat;
     }
@@ -102,76 +102,74 @@
     div.innerHTML = `
       <label class="q-label">【${q.id}】 ${q.text}</label>
       <div class="option-group">
-        ${[1,2,3,4,5,6].map(v => `<label style="flex:1; text-align:center;"><input type="radio" name="q${q.id}" value="${v}" required><br>${v}</label>`).join('')}
+        ${[1,2,3,4,5,6].map(v => `<div class="option-item"><label><input type="radio" name="q${q.id}" value="${v}" required><br>${v}</label></div>`).join('')}
       </div>
     `;
     qArea.appendChild(div);
   });
 
-  // 3. ステップ切り替えの制御
-  const form = document.getElementById('ooo-form');
+  // 3. ステップ切り替えの制御（★ここを修正しました）
   const steps = document.querySelectorAll('.step');
-  let currentIdx = 0;
-
-  function showStep(idx) {
-    steps.forEach((step, i) => {
-      step.classList.toggle('active', i === idx);
-    });
+  let currentStep = 0;
+  
+  const updateSteps = () => {
+    steps.forEach((s, i) => s.classList.toggle('active', i === currentStep));
     window.scrollTo(0, 0);
-  }
+  };
 
-  // 「次へ」ボタン
-  document.querySelectorAll('.next-btn').forEach(btn => {
+  // 「次へ」ボタンの処理
+  document.querySelectorAll('.next').forEach(btn => {
     btn.addEventListener('click', () => {
-      // 現在のステップに入力漏れがないか確認
-      if (steps[currentIdx].querySelector(':invalid')) {
-        steps[currentIdx].querySelector(':invalid').reportValidity();
-      } else {
-        currentIdx++;
-        showStep(currentIdx);
+      // 現在表示されているステップ(steps[currentStep])の中にある入力項目だけをチェックする
+      const currentInputs = steps[currentStep].querySelectorAll('input, select');
+      let isValid = true;
+      
+      // ひとつずつチェック
+      for (const input of currentInputs) {
+        if (!input.checkValidity()) {
+          isValid = false;
+          input.reportValidity(); // エラーメッセージを表示
+          break; // 最初のエラーで止める
+        }
+      }
+
+      // 全部OKなら次へ
+      if (isValid) {
+        currentStep++;
+        updateSteps();
       }
     });
   });
 
-  // 「戻る」ボタン
-  document.querySelectorAll('.prev-btn').forEach(btn => {
+  // 「戻る」ボタンの処理
+  document.querySelectorAll('.prev').forEach(btn => {
     btn.addEventListener('click', () => {
-      currentIdx--;
-      showStep(currentIdx);
+      currentStep--;
+      updateSteps();
     });
   });
 
   // 4. 送信処理
-  form.addEventListener('submit', async (e) => {
+  document.getElementById('ooo-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const submitBtn = document.getElementById('submitBtn');
-    submitBtn.disabled = true;
-    submitBtn.innerText = "送信中...";
-
-    const formData = new FormData(form);
+    const btn = document.getElementById('submitBtn'); 
+    btn.disabled = true; 
+    btn.innerText = "送信中...";
+    
+    const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxhbR8pr3oiqYcyUAmU29ST7ffeHlc1JuzTUSY6WptS3eLlU7JRXitSW70jaBobOBb8tg/exec";
 
-    // スコア合算
     let ocp=0, ofp=0, obp=0;
     oooQuestions.forEach(q => {
       const v = Number(data[`q${q.id}`]);
-      if(q.cat === "OCP") ocp += v;
-      else if(q.cat === "OFP") ofp += v;
-      else if(q.cat === "OBP") obp += v;
+      if(q.cat==="OCP") ocp+=v; else if(q.cat==="OFP") ofp+=v; else obp+=v;
     });
 
     const payload = {
-      consent: data.consent === 'yes',
-      gender: data.gender,
-      age: Number(data.age),
-      degree: data.degree,
-      years_licensed: Number(data.yearsLicensed),
-      specialty: data.specialty,
-      ocp_score: ocp,
-      ofp_score: ofp,
-      obp_score: obp,
-      total_score: ocp + ofp + obp,
+      consent: data.consent==='yes', gender: data.gender, age: Number(data.age), degree: data.degree,
+      years_licensed: Number(data.yearsLicensed), specialty: data.specialty,
+      ocp_score: ocp, ofp_score: ofp, obp_score: obp, total_score: ocp+ofp+obp,
       responses: data
     };
 
@@ -179,10 +177,10 @@
       await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
       sessionStorage.setItem('ooo_result', JSON.stringify(payload));
       window.location.href = 'result.html';
-    } catch (err) {
-      alert("送信に失敗しました。");
-      submitBtn.disabled = false;
-      submitBtn.innerText = "結果を見る";
+    } catch(err) { 
+      alert("送信に失敗しました。"); 
+      btn.disabled = false; 
+      btn.innerText = "結果を見る";
     }
   });
 </script>

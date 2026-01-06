@@ -8,19 +8,61 @@
   <style>
     body { font-family: 'M PLUS Rounded 1c', sans-serif; max-width:800px; margin:auto; padding:20px; background-color: #f4f7f9; }
     h1 { text-align:center; color: #26466d; }
+    
+    /* 画面切り替え用 */
     .step-section { display: none; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .step-section.active { display: block; }
+    
     h3 { margin-top: 2em; padding: 0.5em; background-color: #26466d; color: #fff; border-radius: 6px; text-align: center; }
     .question { margin: 2em 0; padding-bottom: 1.5em; border-bottom: 1px solid #eee; }
     .q-label { font-weight: bold; display: block; margin-bottom: 1em; }
     .option-group { display: flex; justify-content: space-between; align-items: center; }
     .option-item { text-align: center; flex: 1; cursor: pointer; }
     .controls { text-align: center; margin-top: 2em; }
-    button { background-color: #26466d; color: #fff; border: none; border-radius: 4px; padding: 12px 24px; cursor: pointer; font-weight: bold; font-size: 1em; }
-    button:disabled { background-color: #ccc; }
-    button.back-btn { background-color: #888; margin-right: 10px; }
+    
+    /* ボタンのスタイル（アニメーション追加） */
+    button { 
+      background-color: #26466d; 
+      color: #fff; 
+      border: none; 
+      border-radius: 8px; /* 角丸を少し柔らかく */
+      padding: 12px 24px; 
+      cursor: pointer; 
+      font-weight: bold; 
+      font-size: 1.1em;
+      /* ここがアニメーション設定 */
+      transition: all 0.3s ease; 
+    }
+
+    /* マウスが乗ったときの動き（浮き上がる） */
+    button:hover:not(:disabled) {
+      background-color: #1e3755;
+      transform: translateY(-3px); /* 上に3px浮く */
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* 影を落とす */
+    }
+
+    /* 無効化されたボタン */
+    button:disabled { 
+      background-color: #ccc; 
+      cursor: not-allowed; 
+      transform: none; 
+      box-shadow: none; 
+    }
+
+    /* 戻るボタン */
+    button.back-btn { 
+      background-color: #888; 
+      margin-right: 10px; 
+    }
+    button.back-btn:hover {
+      background-color: #666;
+    }
+    
     input[type="number"], select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
     .error-msg { color: red; font-weight: bold; display: none; margin-bottom: 10px; }
+    
+    /* 同意画面の説明ボックス */
+    .consent-box { background-color: #f0f7ff; padding: 20px; border-radius: 8px; border-left: 5px solid #26466d; margin-bottom: 20px; font-size: 0.95em; line-height: 1.8; }
   </style>
 </head>
 <body>
@@ -28,10 +70,42 @@
   
   <form id="ooo-form">
     
-    <div id="step2" class="step-section active">
+    <div id="step1" class="step-section active">
+      <h2>研究利用の同意</h2>
+      
+      <div class="consent-box">
+        <p>「OOOsをやってみる」ボタンを押していただきありがとうございます。<br>
+        この画面では、研究利用に関するご確認をさせていただきます。</p>
+        <p>もちろん、「データは使ってほしくないな」と思われた場合は「いいえ」を選んでいただいて大丈夫です。その場合、ご入力いただいたデータは使用せず、削除します。</p>
+      </div>
+
+      <p style="font-weight:bold; font-size:1.1em; margin-bottom:15px;">
+        回答データは、匿名性を保持した状態で統計的に処理され研究に利用される場合があります。<br>
+        よろしいでしょうか？
+      </p>
+
+      <div style="margin: 20px 0;">
+        <label style="display:block; margin-bottom:10px; cursor:pointer;">
+          <input type="radio" name="consent" value="yes"> 
+          <strong>はい</strong>（研究や精度向上にデータを使ってもよいです。）
+        </label>
+        <label style="display:block; cursor:pointer;">
+          <input type="radio" name="consent" value="no"> 
+          <strong>いいえ</strong>（データを使ってほしくないです）
+        </label>
+      </div>
+
+      <p id="error1" class="error-msg">※「はい」または「いいえ」を選択してください</p>
+
+      <div class="controls">
+        <button type="button" id="btn-go-to-2">次へ</button>
+      </div>
+    </div>
+
+    <div id="step2" class="step-section">
       <h2>プロフィール</h2>
       <p style="font-size:0.9em; color:#666; margin-bottom:20px;">
-        回答データは統計的に処理され研究に利用される場合があります。<br>以下を入力して「質問回答へ」進んでください。
+        以下を入力して「質問回答へ」進んでください。
       </p>
 
       <div style="margin-bottom:15px;">性別：<select name="gender" id="inp-gender"><option value="">選択</option><option value="男性">男性</option><option value="女性">女性</option><option value="その他">その他</option></select></div>
@@ -50,13 +124,16 @@
       <p id="error2" class="error-msg">※すべての項目を入力してください</p>
       
       <div class="controls">
+        <button type="button" class="back-btn" id="btn-back-to-1">戻る</button>
         <button type="button" id="btn-go-to-3">質問回答へ</button>
       </div>
     </div>
 
     <div id="step3" class="step-section">
       <div id="questions-area"></div>
+      
       <p id="error3" class="error-msg">※未回答の項目があります</p>
+      
       <div class="controls">
         <button type="button" class="back-btn" id="btn-back-to-2">戻る</button>
         <button type="submit" id="submitBtn">結果を見る</button>
@@ -117,10 +194,32 @@
   });
 
   // 3. 画面遷移処理
+  const step1 = document.getElementById('step1');
   const step2 = document.getElementById('step2');
   const step3 = document.getElementById('step3');
   
-  // ▼プロフィールの「次へ」
+  // ▼同意画面の「次へ」
+  document.getElementById('btn-go-to-2').addEventListener('click', function() {
+    const consent = document.querySelector('input[name="consent"]:checked');
+    if (!consent) {
+      document.getElementById('error1').style.display = 'block';
+      alert("「はい」または「いいえ」を選択してください");
+      return;
+    }
+    document.getElementById('error1').style.display = 'none';
+    step1.classList.remove('active');
+    step2.classList.add('active');
+    window.scrollTo(0,0);
+  });
+
+  // ▼プロフィールの「戻る」（同意画面へ）
+  document.getElementById('btn-back-to-1').addEventListener('click', function() {
+    step2.classList.remove('active');
+    step1.classList.add('active');
+    window.scrollTo(0,0);
+  });
+
+  // ▼プロフィールの「次へ」（質問画面へ）
   document.getElementById('btn-go-to-3').addEventListener('click', function() {
     const gender = document.getElementById('inp-gender').value;
     const age = document.getElementById('inp-age').value;
@@ -139,7 +238,7 @@
     window.scrollTo(0,0);
   });
 
-  // ▼アンケートの「戻る」
+  // ▼アンケートの「戻る」（プロフィールへ）
   document.getElementById('btn-back-to-2').addEventListener('click', function() {
     step3.classList.remove('active');
     step2.classList.add('active');
@@ -174,7 +273,7 @@
     });
 
     const payload = {
-      consent: true,  // 強制的に同意ありとして送信
+      consent: data.consent === 'yes', // 選んだ結果を送信
       gender: data.gender,
       age: Number(data.age),
       degree: data.degree,

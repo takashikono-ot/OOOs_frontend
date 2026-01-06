@@ -6,14 +6,15 @@
   <title>OOOs 潜在ランクチェック</title>
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet">
   <style>
-    /* 1. 文字サイズを全体的に大きく (18px) */
+    /* 基本設定 */
     body { 
       font-family: 'M PLUS Rounded 1c', sans-serif; 
       max-width: 800px; 
       margin: auto; 
       padding: 20px; 
+      padding-top: 40px; 
       background-color: #f4f7f9; 
-      font-size: 18px; /* ←ここを大きくしました */
+      font-size: 18px; 
       line-height: 1.6;
       color: #333;
     }
@@ -29,161 +30,91 @@
     .question { margin: 3em 0; padding-bottom: 2em; border-bottom: 1px dashed #ccc; }
     .q-label { font-weight: bold; display: block; margin-bottom: 1.2em; font-size: 1.1em; }
     
-    /* 2. ラジオボタンを押しやすくカスタマイズ */
-    .option-group { 
-      display: flex; 
-      justify-content: space-between; 
-      gap: 5px; /* ボタン同士の間隔 */
-    }
-    .option-item { 
-      flex: 1; 
-      text-align: center; 
-      position: relative;
-    }
-    
-    /* ボタンの見た目を作る */
+    /* ラジオボタン */
+    .option-group { display: flex; justify-content: space-between; gap: 5px; }
+    .option-item { flex: 1; text-align: center; }
     .option-item label {
-      display: block;
-      padding: 15px 5px; /* タップ領域を広げる */
-      background: #f8f9fa;
-      border: 2px solid #e9ecef;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s;
+      display: block; padding: 15px 5px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; cursor: pointer; transition: all 0.2s;
     }
-    
-    /* マウスを乗せたとき */
-    .option-item label:hover {
-      background-color: #e2e6ea;
-      border-color: #adb5bd;
-    }
-    
-    /* 選択されたときの色変化（CSSマジック） */
-    .option-item input[type="radio"]:checked + span {
-      font-weight: bold;
-      color: #fff;
-    }
-    .option-item input[type="radio"]:checked + span::before {
-      /* 親labelのスタイル変更ハック的な処理はJSでクラス付与の方が確実ですが、今回は簡易的に背景色変更 */
-    }
-    /* inputそのものは隠さず、大きくする */
-    .option-item input[type="radio"] {
-      transform: scale(1.8); /* 丸ポチを巨大化 */
-      margin-bottom: 8px;
-      cursor: pointer;
-    }
-    
-    /* 選択状態の親ラベルを目立たせる */
-    .option-item:has(input:checked) label {
-      background-color: #26466d;
-      color: white;
-      border-color: #26466d;
-    }
+    .option-item label:hover { background-color: #e2e6ea; border-color: #adb5bd; }
+    .option-item:has(input:checked) label { background-color: #26466d; color: white; border-color: #26466d; }
+    .option-item input[type="radio"] { transform: scale(1.5); margin-bottom: 5px; }
 
+    /* コントロールボタン */
     .controls { text-align: center; margin-top: 3em; }
-    
-    /* ボタンデザイン */
     button { 
-      background-color: #26466d; 
-      color: #fff; 
-      border: none; 
-      border-radius: 8px; 
-      padding: 15px 40px; /* パディングを増やして大きく */
-      cursor: pointer; 
-      font-weight: bold; 
-      font-size: 1.1em;
-      transition: all 0.3s ease; 
-      margin: 10px;
+      background-color: #26466d; color: #fff; border: none; border-radius: 8px; padding: 15px 40px; 
+      cursor: pointer; font-weight: bold; font-size: 1.1em; transition: all 0.3s ease; margin: 10px;
     }
-    button:hover:not(:disabled) {
-      background-color: #1e3755;
-      transform: translateY(-3px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-    }
-    button:disabled { 
-      background-color: #ccc; 
-      cursor: not-allowed; 
-    }
-    button.back-btn { 
-      background-color: #888; 
-    }
+    button:hover:not(:disabled) { background-color: #1e3755; transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.2); }
+    button:disabled { background-color: #ccc; cursor: not-allowed; }
+    button.back-btn { background-color: #888; }
+    button.back-btn:hover { background-color: #666; }
     
-    /* 入力フォームも大きく */
-    input[type="number"], select { 
-      padding: 12px; 
-      border: 1px solid #ccc; 
-      border-radius: 6px; 
-      font-size: 1em; 
-      min-width: 100px;
+    /* 入力フォーム共通 */
+    select { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; min-width: 150px; }
+    
+    /* 数値入力用のカスタムデザイン */
+    .number-control-group {
+      display: flex; align-items: center; gap: 10px;
     }
+    .num-btn {
+      width: 50px; height: 50px; background-color: #e9ecef; color: #26466d; font-size: 1.5em; font-weight: bold;
+      border: 1px solid #ccc; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+    }
+    .num-btn:hover { background-color: #dde2e6; transform: none; box-shadow: none; }
+    .num-btn:active { background-color: #ccc; }
+    
+    input[type="number"] { 
+      padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1.2em; width: 80px; text-align: center; -moz-appearance: textfield; 
+    }
+    input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    
     .error-msg { color: #d9534f; font-weight: bold; display: none; margin-bottom: 20px; padding: 10px; background: #fdf7f7; border-left: 5px solid #d9534f; }
-    
     .consent-box { background-color: #f0f7ff; padding: 25px; border-radius: 8px; border-left: 6px solid #26466d; margin-bottom: 25px; }
 
-    /* 3. 尺度の目安表（凡例） */
-    .scale-legend {
-      background: #fff;
-      border: 2px solid #26466d;
-      border-radius: 10px;
-      padding: 20px;
-      margin-bottom: 40px;
+    /* プログレスバー */
+    #progress-container { position: fixed; top: 0; left: 0; width: 100%; height: 8px; background: #eee; z-index: 999; }
+    #progress-bar { height: 100%; background: #26466d; width: 0%; transition: width 0.3s; }
+
+    /* 追従する採点基準表 */
+    .sticky-legend {
+      position: sticky; top: 0; z-index: 100; background: rgba(255, 255, 255, 0.98); border-bottom: 3px solid #26466d;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin: -30px -30px 30px -30px; padding: 15px;
     }
-    .scale-legend h4 {
-      text-align: center;
-      margin-top: 0;
-      color: #26466d;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 10px;
-    }
-    .scale-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr; /* 2列表示 */
-      gap: 10px;
-    }
-    .scale-item {
-      padding: 5px;
-      font-size: 0.9em;
-    }
-    .scale-num {
-      display: inline-block;
-      width: 30px;
-      height: 30px;
-      line-height: 30px;
-      text-align: center;
-      background: #26466d;
-      color: white;
-      border-radius: 50%;
-      margin-right: 8px;
-      font-weight: bold;
-    }
-    
-    /* スマホ対応 */
+    .legend-content { max-height: 180px; overflow-y: auto; border: 1px solid #ddd; border-radius: 6px; font-size: 0.85em; }
+    .legend-table { width: 100%; border-collapse: collapse; }
+    .legend-table th { background: #26466d; color: white; padding: 8px; width: 40px; text-align: center; position: sticky; top: 0; }
+    .legend-table td { border-bottom: 1px solid #eee; padding: 8px; vertical-align: top; }
+    .legend-score { font-weight: bold; font-size: 1.2em; color: #26466d; text-align: center; }
+    .legend-title { font-weight: bold; display: block; margin-bottom: 4px; }
+    .legend-desc { color: #555; font-size: 0.9em; }
+
     @media (max-width: 600px) {
       .option-group { flex-wrap: wrap; }
-      .option-item { flex: 1 0 30%; margin-bottom: 10px; } /* 3つ折り返し */
-      .scale-grid { grid-template-columns: 1fr; } /* 1列表示 */
+      .option-item { flex: 1 0 30%; margin-bottom: 10px; }
+      .sticky-legend { padding: 10px; margin: -30px -30px 20px -30px; }
+      .legend-content { max-height: 150px; }
     }
   </style>
 </head>
 <body>
+  
+  <div id="progress-container"><div id="progress-bar"></div></div>
+
   <h1>OOOs 潜在ランクチェック</h1>
   
   <form id="ooo-form">
     
     <div id="step1" class="step-section active">
       <h2>研究利用の同意</h2>
-      
       <div class="consent-box">
-        <p>「OOOsをやってみる」ボタンを押していただきありがとうございます。<br>
-        この画面では、研究利用に関するご確認をさせていただきます。</p>
-        <p>もちろん、「データは使ってほしくないな」と思われた場合は「いいえ」を選んでいただいて大丈夫です。その場合、ご入力いただいたデータは使用せず、削除します。</p>
+        <p>「OOOsをやってみる」ボタンを押していただきありがとうございます。<br>この画面では、研究利用に関するご確認をさせていただきます。</p>
+        <p>もちろん、「データは使ってほしくないな」と思われた場合は「いいえ」を選んでいただいて大丈夫です。その場合、データは使用せず削除します。</p>
       </div>
-
       <p style="font-weight:bold; margin-bottom:20px;">
-        回答データは、匿名性を保持した状態で統計的に処理され研究に利用される場合があります。<br>
-        よろしいでしょうか？
+        回答データは、匿名性を保持した状態で統計的に処理され研究に利用される場合があります。<br>よろしいでしょうか？
       </p>
-
       <div style="margin: 30px 0;">
         <label style="display:block; margin-bottom:20px; cursor:pointer; padding:15px; background:#fff; border-radius:8px; border:1px solid #ddd;">
           <input type="radio" name="consent" value="yes" style="transform:scale(1.5); margin-right:10px;"> 
@@ -194,64 +125,72 @@
           <strong>いいえ</strong>（データを使ってほしくないです）
         </label>
       </div>
-
       <p id="error1" class="error-msg">※「はい」または「いいえ」を選択してください</p>
-
+      
       <div class="controls">
+        <button type="button" class="back-btn" id="btn-back-to-home">戻る</button>
         <button type="button" id="btn-go-to-2">次へ</button>
       </div>
     </div>
 
     <div id="step2" class="step-section">
       <h2>プロフィール</h2>
-      <p style="color:#666; margin-bottom:30px;">
-        以下を入力して「質問回答へ」進んでください。
-      </p>
+      <p style="color:#666; margin-bottom:30px;">以下を入力して「質問回答へ」進んでください。</p>
 
       <div style="margin-bottom:20px;">性別：<br><select name="gender" id="inp-gender"><option value="">選択してください</option><option value="男性">男性</option><option value="女性">女性</option><option value="その他">その他</option></select></div>
-      <div style="margin-bottom:20px;">年齢：<br><input type="number" name="age" id="inp-age" min="18" max="100" placeholder="例: 30"> 歳</div>
+      
+      <div style="margin-bottom:20px;">年齢：<br>
+        <div class="number-control-group">
+          <button type="button" class="num-btn" onclick="changeVal('inp-age', -1)">−</button>
+          <input type="number" name="age" id="inp-age" min="18" max="100" placeholder="30">
+          <button type="button" class="num-btn" onclick="changeVal('inp-age', 1)">＋</button>
+          <span>歳</span>
+        </div>
+      </div>
+      
       <div style="margin-bottom:20px;">取得学位：<br><select name="degree" id="inp-degree">
         <option value="">選択してください</option><option value="短期大学士">短期大学士</option>
         <option value="専門士">専門士/高度専門士</option><option value="学士">学士</option>
         <option value="修士">修士</option><option value="博士">博士</option><option value="その他">その他</option>
       </select></div>
-      <div style="margin-bottom:20px;">国家資格取得後の年数：<br><input type="number" name="yearsLicensed" id="inp-years" min="0" placeholder="例: 5"> 年目</div>
+      
+      <div style="margin-bottom:20px;">国家資格取得後の年数：<br>
+        <div class="number-control-group">
+          <button type="button" class="num-btn" onclick="changeVal('inp-years', -1)">−</button>
+          <input type="number" name="yearsLicensed" id="inp-years" min="0" placeholder="10">
+          <button type="button" class="num-btn" onclick="changeVal('inp-years', 1)">＋</button>
+          <span>年目</span>
+        </div>
+      </div>
+      
       <div style="margin-bottom:20px;">主な専門領域：<br><select name="specialty" id="inp-specialty">
         <option value="">選択してください</option><option value="身体障害">身体障害</option><option value="精神障害">精神障害</option>
         <option value="発達障害">発達障害</option><option value="老年期障害">老年期障害</option><option value="その他">その他</option>
       </select></div>
       
       <p id="error2" class="error-msg">※すべての項目を入力してください</p>
-      
-      <div class="controls">
-        <button type="button" class="back-btn" id="btn-back-to-1">戻る</button>
-        <button type="button" id="btn-go-to-3">質問回答へ</button>
-      </div>
+      <div class="controls"><button type="button" class="back-btn" id="btn-back-to-1">戻る</button><button type="button" id="btn-go-to-3">質問回答へ</button></div>
     </div>
 
     <div id="step3" class="step-section">
-      <h2>質問回答</h2>
-      
-      <div class="scale-legend">
-        <h4>回答の目安</h4>
-        <div class="scale-grid">
-          <div class="scale-item"><span class="scale-num">6</span> できる</div>
-          <div class="scale-item"><span class="scale-num">5</span> ほとんどできる</div>
-          <div class="scale-item"><span class="scale-num">4</span> ある程度できる</div>
-          <div class="scale-item"><span class="scale-num">3</span> あまりできない</div>
-          <div class="scale-item"><span class="scale-num">2</span> ほとんどできない</div>
-          <div class="scale-item"><span class="scale-num">1</span> できない</div>
+      <div class="sticky-legend">
+        <div style="text-align:center; font-weight:bold; color:#26466d; margin-bottom:5px;">▼ 回答の目安（スクロールして確認できます）</div>
+        <div class="legend-content">
+          <table class="legend-table">
+            <tr><td class="legend-score">6</td><td><span class="legend-title">できる</span><span class="legend-desc">根拠を持って実践でき、他者への指導や、応用的な場面や事例への対応した実践ができる。</span></td></tr>
+            <tr><td class="legend-score">5</td><td><span class="legend-title">ほとんどできる</span><span class="legend-desc">理屈や意味を理解しており、標準的な場面であれば、自信を持って実践できる。</span></td></tr>
+            <tr><td class="legend-score">4</td><td><span class="legend-title">ある程度できる</span><span class="legend-desc">手順や方法は理解しており、質や結果にムラはあるものの、実践できる。</span></td></tr>
+            <tr><td class="legend-score">3</td><td><span class="legend-title">あまりできない</span><span class="legend-desc">必要性は理解している。マニュアルや手順を確認したり、助言を得たりすれば実践できる。</span></td></tr>
+            <tr><td class="legend-score">2</td><td><span class="legend-title">ほとんどできない</span><span class="legend-desc">その項目が具体的に何をすることか（目的・方法）を正しく説明できるが、実践はほとんどしたことがない。</span></td></tr>
+            <tr><td class="legend-score">1</td><td><span class="legend-title">できない</span><span class="legend-desc">用語を知らない、又は用語は見聞きしたことがあるが、具体的にどういうことかは説明できず実践はしたことがない、又はできない。</span></td></tr>
+          </table>
         </div>
       </div>
 
       <div id="questions-area"></div>
       
       <p id="error3" class="error-msg">※未回答の項目があります。すべての質問にお答えください。</p>
-      
-      <div class="controls">
-        <button type="button" class="back-btn" id="btn-back-to-2">戻る</button>
-        <button type="submit" id="submitBtn">結果を見る</button>
-      </div>
+      <div class="controls"><button type="button" class="back-btn" id="btn-back-to-2">戻る</button><button type="submit" id="submitBtn">結果を見る</button></div>
     </div>
   </form>
 
@@ -285,7 +224,7 @@
     { id: 25, cat: "OBP", text: "クライエントのなじみのある生活環境で介入が困難な場合、可能な限り類似した環境で直接作業を用いた介入ができる" }
   ];
 
-  // 質問画面生成（ボタンを押しやすくカスタマイズ）
+  // 質問画面生成
   const qArea = document.getElementById('questions-area');
   let lastCat = "";
   oooQuestions.forEach(q => {
@@ -303,7 +242,7 @@
         ${[1,2,3,4,5,6].map(v => 
           `<div class="option-item">
              <label>
-               <input type="radio" name="q${q.id}" value="${v}" required><br>
+               <input type="radio" name="q${q.id}" value="${v}" required onchange="updateProgress()"><br>
                <span>${v}</span>
              </label>
            </div>`
@@ -312,59 +251,76 @@
     qArea.appendChild(div);
   });
 
-  // 画面遷移処理
+  // プログレスバー更新
+  window.updateProgress = function() {
+    const answered = document.querySelectorAll('#questions-area input:checked').length;
+    const total = 25;
+    const percent = (answered / total) * 100;
+    document.getElementById('progress-bar').style.width = percent + "%";
+  }
+
+  // ★数値入力の＋−ボタン制御
+  window.changeVal = function(id, amount) {
+    const input = document.getElementById(id);
+    let val = parseInt(input.value);
+    
+    // 空欄の場合はプレースホルダーの値(30や10)を基準にする
+    if (isNaN(val)) {
+      val = parseInt(input.placeholder) || 0;
+      // 最初のクリックで値をセットするだけにするならここで input.value = val; return; でもよいが、
+      // ここでは「基準値 + 増減」していきなり動くようにする
+    }
+
+    let newVal = val + amount;
+    if (input.min && newVal < parseInt(input.min)) newVal = parseInt(input.min);
+    if (input.max && newVal > parseInt(input.max)) newVal = parseInt(input.max);
+    
+    input.value = newVal;
+  }
+
+  // 画面遷移
   const step1 = document.getElementById('step1');
   const step2 = document.getElementById('step2');
   const step3 = document.getElementById('step3');
   
-  // 同意画面の「次へ」
+  // ★追加: Step1 -> ホームページへ戻る
+  document.getElementById('btn-back-to-home').addEventListener('click', function() {
+    window.location.href = 'https://takashikono-ot.github.io/my-homepage/';
+  });
+
+  // Step1 -> Step2
   document.getElementById('btn-go-to-2').addEventListener('click', function() {
-    const consent = document.querySelector('input[name="consent"]:checked');
-    if (!consent) {
-      document.getElementById('error1').style.display = 'block';
-      alert("「はい」または「いいえ」を選択してください");
-      return;
+    if (!document.querySelector('input[name="consent"]:checked')) {
+      document.getElementById('error1').style.display = 'block'; alert("選択してください"); return;
     }
     document.getElementById('error1').style.display = 'none';
-    step1.classList.remove('active');
-    step2.classList.add('active');
-    window.scrollTo(0,0);
+    step1.classList.remove('active'); step2.classList.add('active'); window.scrollTo(0,0);
   });
 
-  // プロフィールの「戻る」
+  // Step2 -> Step1
   document.getElementById('btn-back-to-1').addEventListener('click', function() {
-    step2.classList.remove('active');
-    step1.classList.add('active');
-    window.scrollTo(0,0);
+    step2.classList.remove('active'); step1.classList.add('active'); window.scrollTo(0,0);
   });
 
-  // プロフィールの「次へ」
+  // Step2 -> Step3
   document.getElementById('btn-go-to-3').addEventListener('click', function() {
-    const gender = document.getElementById('inp-gender').value;
-    const age = document.getElementById('inp-age').value;
-    const degree = document.getElementById('inp-degree').value;
-    const years = document.getElementById('inp-years').value;
-    const specialty = document.getElementById('inp-specialty').value;
-
-    if (!gender || !age || !degree || !years || !specialty) {
-      document.getElementById('error2').style.display = 'block';
-      alert("プロフィールのすべての項目を入力してください");
-      return;
+    const ids = ['inp-gender','inp-age','inp-degree','inp-years','inp-specialty'];
+    let ok = true;
+    ids.forEach(id => { if(!document.getElementById(id).value) ok = false; });
+    
+    if (!ok) {
+      document.getElementById('error2').style.display = 'block'; alert("未入力の項目があります"); return;
     }
     document.getElementById('error2').style.display = 'none';
-    step2.classList.remove('active');
-    step3.classList.add('active');
-    window.scrollTo(0,0);
+    step2.classList.remove('active'); step3.classList.add('active'); window.scrollTo(0,0);
   });
 
-  // アンケートの「戻る」
+  // Step3 -> Step2
   document.getElementById('btn-back-to-2').addEventListener('click', function() {
-    step3.classList.remove('active');
-    step2.classList.add('active');
-    window.scrollTo(0,0);
+    step3.classList.remove('active'); step2.classList.add('active'); window.scrollTo(0,0);
   });
 
-  // 送信処理
+  // 送信
   document.getElementById('ooo-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     const formData = new FormData(document.getElementById('ooo-form'));
@@ -373,14 +329,11 @@
     for(let i=1; i<=25; i++) { if(!data["q"+i]) allAnswered = false; }
 
     if(!allAnswered) {
-      document.getElementById('error3').style.display = 'block';
-      alert("未回答の項目があります。");
-      return;
+      document.getElementById('error3').style.display = 'block'; alert("未回答の項目があります。"); return;
     }
 
     const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.innerText = "送信中...";
+    btn.disabled = true; btn.innerText = "送信中...";
 
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxhbR8pr3oiqYcyUAmU29ST7ffeHlc1JuzTUSY6WptS3eLlU7JRXitSW70jaBobOBb8tg/exec";
 
@@ -406,9 +359,7 @@
       sessionStorage.setItem('ooo_result', JSON.stringify(payload));
       window.location.href = 'result.html';
     } catch(err) {
-      alert("送信エラーが発生しました。");
-      btn.disabled = false;
-      btn.innerText = "結果を見る";
+      alert("送信エラー"); btn.disabled = false; btn.innerText = "結果を見る";
     }
   });
 </script>

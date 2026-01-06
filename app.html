@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>OOOs 潜在ランクチェック</title>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; max-width:800px; margin:auto; padding:20px; background-color: #f4f7f9; }
+    h1 { text-align:center; color: #26466d; }
+    .step { display: none; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .step.active { display: block; }
+    h3 { margin-top: 2em; padding: 0.5em; background-color: #26466d; color: #fff; border-radius: 6px; text-align: center; }
+    .question { margin: 2em 0; padding-bottom: 1.5em; border-bottom: 1px solid #eee; }
+    .q-label { font-weight: bold; display: block; margin-bottom: 1em; }
+    .option-group { display: flex; justify-content: space-between; }
+    .controls { text-align: center; margin-top: 2em; }
+    button { background-color: #26466d; color: #fff; border: none; border-radius: 4px; padding: 12px 24px; cursor: pointer; font-weight: bold; }
+    button:disabled { background-color: #ccc; }
+    input[type="number"], select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>OOOs 潜在ランクチェック</h1>
+  <form id="ooo-form">
+    <section class="step active">
+      <h2>研究利用の同意</h2>
+      <p>入力されたデータは、統計的に処理され研究に利用される場合があります。</p>
+      <label><input type="radio" name="consent" value="yes" required> 同意する</label><br>
+      <label><input type="radio" name="consent" value="no"> 同意しない</label>
+      <div class="controls"><button type="button" class="next">次へ</button></div>
+    </section>
+
+    <section class="step">
+      <h2>プロフィール</h2>
+      <div>性別：<select name="gender" required><option value="">選択</option><option value="男性">男性</option><option value="女性">女性</option></select></div><br>
+      <div>年齢：<input type="number" name="age" min="18" max="100" required> 歳</div><br>
+      <div>取得学位：<select name="degree" required>
+        <option value="">選択</option><option value="短期大学士">短期大学士</option>
+        <option value="専門士">専門士/高度専門士</option><option value="学士">学士</option>
+        <option value="修士">修士</option><option value="博士">博士</option>
+      </select></div><br>
+      <div>経験年数：<input type="number" name="yearsLicensed" min="0" required> 年目</div><br>
+      <div>専門領域：<select name="specialty" required>
+        <option value="">選択</option><option value="身体">身体障害</option><option value="精神">精神障害</option>
+        <option value="発達">発達障害</option><option value="老年">老年期障害</option><option value="その他">その他</option>
+      </select></div>
+      <div class="controls"><button type="button" class="prev">戻る</button><button type="button" class="next">質問へ</button></div>
+    </section>
+
+    <section class="step">
+      <div id="questions-area"></div>
+      <div class="controls"><button type="button" class="prev">戻る</button><button type="submit" id="submitBtn">結果を見る</button></div>
+    </section>
+  </form>
+
+<script>
+  const oooQuestions = [
+    { id: 1, cat: "OCP", text: "クライエントが生きるうえで、作業がなぜ必要か説明できる" },
+    { id: 2, cat: "OCP", text: "クライエントの健康・幸福のために、作業がなぜ必要か説明できる" },
+    { id: 3, cat: "OCP", text: "クライエントにとって、作業の意味や価値の重要性を解釈できる" },
+    { id: 4, cat: "OCP", text: "クライエントの作業に関する物理的・社会的環境の側面を認識できる" },
+    { id: 5, cat: "OCP", text: "クライエントの作業が、文化的背景や社会的規範によってどのように形作られているか理解できる" },
+    { id: 6, cat: "OCP", text: "クライエントの作業の過去・現在・未来の連続性を解釈できる" },
+    { id: 7, cat: "OCP", text: "クライエントの作業に関する課題に対し、作業の視点を主軸に据え、多様なリーズニングを使い分けて方針を決定できる" },
+    { id: 8, cat: "OCP", text: "クライエントが直面する課題を、身体機能や精神機能だけでなく、作業との関連で捉えることができる" },
+    { id: 9, cat: "OFP", text: "クライエントにとって意味のある作業を特定できる" },
+    { id: 10, cat: "OFP", text: "クライエントの作業に対する主観的な経験（重要度、実行度など）を評価できる" },
+    { id: 11, cat: "OFP", text: "クライエントの現在の役割や習慣が作業に与える影響を評価し、介入計画を立案できる" },
+    { id: 12, cat: "OFP", text: "クライエントの現在の作業に関する課題を明確にすることができる" },
+    { id: 13, cat: "OFP", text: "クライエントと協働し、作業に関する目標を設定できる" },
+    { id: 14, cat: "OFP", text: "クライエントの作業に関する目標に対し、達成度を継続的に評価することができる" },
+    { id: 15, cat: "OFP", text: "クライエントに作業の意味や価値への気づきを促すことができる" },
+    { id: 16, cat: "OFP", text: "クライエントの作業への参加を促進するため、周囲の理解を深め、支援的な環境を整えることができる" },
+    { id: 17, cat: "OBP", text: "クライエントが実際に行う作業の質を、観察評価できる" },
+    { id: 18, cat: "OBP", text: "クライエントが実際に行う作業を観察し、人・環境・作業の相互関係を分析できる" },
+    { id: 19, cat: "OBP", text: "クライエントに合う作業を見つけるため、実際の作業を試すことができる" },
+    { id: 20, cat: "OBP", text: "クライエントの作業に関する課題を解決するために、作業の難易度を段階づけることができる" },
+    { id: 21, cat: "OBP", text: "クライエントが実際の作業を行う過程で、手本・介助・助言や問いかけを使い分け、最適なやり方の習得を支援できる" },
+    { id: 22, cat: "OBP", text: "クライエントが実際に作業に取り組むことを通して、自己認識（アイデンティティや成長の実感）の構築を支援できる" },
+    { id: 23, cat: "OBP", text: "クライエントが居場所を手にいれるため、実際に作業に取り組むことを通して支援できる" },
+    { id: 24, cat: "OBP", text: "クライエントの課題解決のために、なじみのある実際の生活環境で直接作業を用いた介入ができる" },
+    { id: 25, cat: "OBP", text: "クライエントのなじみのある生活環境で介入が困難な場合、可能な限り類似した環境で直接作業を用いた介入ができる" }
+  ];
+
+  const qArea = document.getElementById('questions-area');
+  let lastCat = "";
+  oooQuestions.forEach(q => {
+    if(q.cat !== lastCat){
+      const h3 = document.createElement('h3'); h3.innerText = q.cat; qArea.appendChild(h3); lastCat = q.cat;
+    }
+    const div = document.createElement('div'); div.className='question';
+    div.innerHTML = `<label class="q-label">【${q.id}】${q.text}</label>
+      <div class="option-group">${[1,2,3,4,5,6].map(v => `<label><input type="radio" name="q${q.id}" value="${v}" required><br>${v}</label>`).join('')}</div>`;
+    qArea.appendChild(div);
+  });
+
+  const steps = document.querySelectorAll('.step');
+  let currentStep = 0;
+  const updateSteps = () => { steps.forEach((s,i) => s.classList.toggle('active', i===currentStep)); window.scrollTo(0,0); };
+  document.querySelectorAll('.next').forEach(b => b.addEventListener('click', () => { if(document.getElementById('ooo-form').checkValidity()){ currentStep++; updateSteps(); }else{ document.getElementById('ooo-form').reportValidity(); } }));
+  document.querySelectorAll('.prev').forEach(b => b.addEventListener('click', () => { currentStep--; updateSteps(); }));
+
+  document.getElementById('ooo-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerText = "送信中...";
+    const data = Object.fromEntries(new FormData(e.target));
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxhbR8pr3oiqYcyUAmU29ST7ffeHlc1JuzTUSY6WptS3eLlU7JRXitSW70jaBobOBb8tg/exec";
+
+    let ocp=0, ofp=0, obp=0;
+    oooQuestions.forEach(q => {
+      const v = Number(data[`q${q.id}`]);
+      if(q.cat==="OCP") ocp+=v; else if(q.cat==="OFP") ofp+=v; else obp+=v;
+    });
+
+    const payload = {
+      consent: data.consent==='yes', gender: data.gender, age: Number(data.age), degree: data.degree,
+      years_licensed: Number(data.yearsLicensed), specialty: data.specialty,
+      ocp_score: ocp, ofp_score: ofp, obp_score: obp, total_score: ocp+ofp+obp,
+      responses: data
+    };
+
+    try {
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+      sessionStorage.setItem('ooo_result', JSON.stringify(payload));
+      window.location.href = 'result.html';
+    } catch(err) { alert("送信失敗"); btn.disabled = false; }
+  });
+</script>
+</body>
+</html>

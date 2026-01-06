@@ -8,22 +8,17 @@
   <style>
     body { font-family: 'M PLUS Rounded 1c', sans-serif; max-width:800px; margin:auto; padding:20px; background-color: #f4f7f9; }
     h1 { text-align:center; color: #26466d; }
-    
-    /* 画面切り替え用のスタイル */
     .step-section { display: none; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .step-section.active { display: block; }
-    
     h3 { margin-top: 2em; padding: 0.5em; background-color: #26466d; color: #fff; border-radius: 6px; text-align: center; }
     .question { margin: 2em 0; padding-bottom: 1.5em; border-bottom: 1px solid #eee; }
     .q-label { font-weight: bold; display: block; margin-bottom: 1em; }
     .option-group { display: flex; justify-content: space-between; align-items: center; }
     .option-item { text-align: center; flex: 1; cursor: pointer; }
     .controls { text-align: center; margin-top: 2em; }
-    
     button { background-color: #26466d; color: #fff; border: none; border-radius: 4px; padding: 12px 24px; cursor: pointer; font-weight: bold; font-size: 1em; }
     button:disabled { background-color: #ccc; }
     button.back-btn { background-color: #888; margin-right: 10px; }
-    
     input[type="number"], select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
     .error-msg { color: red; font-weight: bold; display: none; margin-bottom: 10px; }
   </style>
@@ -61,9 +56,7 @@
 
     <div id="step3" class="step-section">
       <div id="questions-area"></div>
-      
       <p id="error3" class="error-msg">※未回答の項目があります</p>
-      
       <div class="controls">
         <button type="button" class="back-btn" id="btn-back-to-2">戻る</button>
         <button type="submit" id="submitBtn">結果を見る</button>
@@ -136,4 +129,71 @@
     const specialty = document.getElementById('inp-specialty').value;
 
     if (!gender || !age || !degree || !years || !specialty) {
-      document.
+      document.getElementById('error2').style.display = 'block';
+      alert("プロフィールのすべての項目を入力してください");
+      return;
+    }
+    document.getElementById('error2').style.display = 'none';
+    step2.classList.remove('active');
+    step3.classList.add('active');
+    window.scrollTo(0,0);
+  });
+
+  // ▼アンケートの「戻る」
+  document.getElementById('btn-back-to-2').addEventListener('click', function() {
+    step3.classList.remove('active');
+    step2.classList.add('active');
+    window.scrollTo(0,0);
+  });
+
+  // 4. 送信処理
+  document.getElementById('ooo-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const formData = new FormData(document.getElementById('ooo-form'));
+    const data = Object.fromEntries(formData.entries());
+    let allAnswered = true;
+    for(let i=1; i<=25; i++) { if(!data["q"+i]) allAnswered = false; }
+
+    if(!allAnswered) {
+      document.getElementById('error3').style.display = 'block';
+      alert("未回答の項目があります。");
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerText = "送信中...";
+
+    // 先生のGAS URL
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxhbR8pr3oiqYcyUAmU29ST7ffeHlc1JuzTUSY6WptS3eLlU7JRXitSW70jaBobOBb8tg/exec";
+
+    let ocp=0, ofp=0, obp=0;
+    oooQuestions.forEach(q => {
+      const v = Number(data[`q${q.id}`]);
+      if(q.cat==="OCP") ocp+=v; else if(q.cat==="OFP") ofp+=v; else obp+=v;
+    });
+
+    const payload = {
+      consent: true,  // 強制的に同意ありとして送信
+      gender: data.gender,
+      age: Number(data.age),
+      degree: data.degree,
+      years_licensed: Number(data.yearsLicensed),
+      specialty: data.specialty,
+      ocp_score: ocp, ofp_score: ofp, obp_score: obp, total_score: ocp+ofp+obp,
+      responses: data
+    };
+
+    try {
+      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+      sessionStorage.setItem('ooo_result', JSON.stringify(payload));
+      window.location.href = 'result.html';
+    } catch(err) {
+      alert("送信エラーが発生しました。");
+      btn.disabled = false;
+      btn.innerText = "結果を見る";
+    }
+  });
+</script>
+</body>
+</html>

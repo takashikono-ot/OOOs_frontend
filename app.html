@@ -8,57 +8,84 @@
   <style>
     body { font-family: 'M PLUS Rounded 1c', sans-serif; max-width:800px; margin:auto; padding:20px; background-color: #f4f7f9; }
     h1 { text-align:center; color: #26466d; }
-    .step { display: none; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-    .step.active { display: block; }
+    
+    /* ステップ（画面）のスタイル */
+    .step-section { display: none; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    /* activeクラスがついているものだけ表示 */
+    .step-section.active { display: block; }
+    
     h3 { margin-top: 2em; padding: 0.5em; background-color: #26466d; color: #fff; border-radius: 6px; text-align: center; }
     .question { margin: 2em 0; padding-bottom: 1.5em; border-bottom: 1px solid #eee; }
     .q-label { font-weight: bold; display: block; margin-bottom: 1em; }
     .option-group { display: flex; justify-content: space-between; align-items: center; }
     .option-item { text-align: center; flex: 1; cursor: pointer; }
     .controls { text-align: center; margin-top: 2em; }
+    
     button { background-color: #26466d; color: #fff; border: none; border-radius: 4px; padding: 12px 24px; cursor: pointer; font-weight: bold; font-size: 1em; }
     button:disabled { background-color: #ccc; }
+    button.back-btn { background-color: #888; margin-right: 10px; }
+    
     input[type="number"], select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 1em; }
+    .error-msg { color: red; font-weight: bold; display: none; margin-bottom: 10px; }
   </style>
 </head>
 <body>
   <h1>OOOs 潜在ランクチェック</h1>
+  
   <form id="ooo-form">
-    <section class="step active">
+    
+    <div id="step1" class="step-section active">
       <h2>研究利用の同意</h2>
-      <p>入力されたデータは、統計的に処理され研究に利用される場合があります。同意いただける場合は「同意する」を選択してください。</p>
+      <p>入力されたデータは、統計的に処理され研究に利用される場合があります。</p>
       <div style="margin: 20px 0;">
-        <label><input type="radio" name="consent" value="yes" required> 同意する</label><br><br>
+        <label><input type="radio" name="consent" value="yes"> 同意する</label><br><br>
         <label><input type="radio" name="consent" value="no"> 同意しない（結果表示のみ行います）</label>
       </div>
-      <div class="controls"><button type="button" class="next">次へ</button></div>
-    </section>
+      <p id="error1" class="error-msg">※いずれかを選択してください</p>
+      <div class="controls">
+        <button type="button" id="btn-go-to-2">次へ</button>
+      </div>
+    </div>
 
-    <section class="step">
+    <div id="step2" class="step-section">
       <h2>プロフィール</h2>
-      <div style="margin-bottom:15px;">性別：<select name="gender" required><option value="">選択</option><option value="男性">男性</option><option value="女性">女性</option><option value="その他">その他</option></select></div>
-      <div style="margin-bottom:15px;">年齢：<input type="number" name="age" min="18" max="100" required> 歳</div>
-      <div style="margin-bottom:15px;">取得学位：<select name="degree" required>
+      <div style="margin-bottom:15px;">性別：<select name="gender" id="inp-gender"><option value="">選択</option><option value="男性">男性</option><option value="女性">女性</option><option value="その他">その他</option></select></div>
+      <div style="margin-bottom:15px;">年齢：<input type="number" name="age" id="inp-age" min="18" max="100" placeholder="例: 30"> 歳</div>
+      <div style="margin-bottom:15px;">取得学位：<select name="degree" id="inp-degree">
         <option value="">選択</option><option value="短期大学士">短期大学士</option>
         <option value="専門士">専門士/高度専門士</option><option value="学士">学士</option>
         <option value="修士">修士</option><option value="博士">博士</option><option value="その他">その他</option>
       </select></div>
-      <div style="margin-bottom:15px;">国家資格取得後の年数：<input type="number" name="yearsLicensed" min="0" required> 年目</div>
-      <div style="margin-bottom:15px;">主な専門領域：<select name="specialty" required>
+      <div style="margin-bottom:15px;">国家資格取得後の年数：<input type="number" name="yearsLicensed" id="inp-years" min="0" placeholder="例: 5"> 年目</div>
+      <div style="margin-bottom:15px;">主な専門領域：<select name="specialty" id="inp-specialty">
         <option value="">選択</option><option value="身体障害">身体障害</option><option value="精神障害">精神障害</option>
         <option value="発達障害">発達障害</option><option value="老年期障害">老年期障害</option><option value="その他">その他</option>
       </select></div>
-      <div class="controls"><button type="button" class="prev">戻る</button><button type="button" class="next">質問回答へ</button></div>
-    </section>
+      
+      <p id="error2" class="error-msg">※すべての項目を入力してください</p>
+      
+      <div class="controls">
+        <button type="button" class="back-btn" id="btn-back-to-1">戻る</button>
+        <button type="button" id="btn-go-to-3">質問回答へ</button>
+      </div>
+    </div>
 
-    <section class="step">
+    <div id="step3" class="step-section">
       <div id="questions-area"></div>
-      <div class="controls"><button type="button" class="prev">戻る</button><button type="submit" id="submitBtn">結果を見る</button></div>
-    </section>
+      
+      <p id="error3" class="error-msg">※未回答の項目があります</p>
+      
+      <div class="controls">
+        <button type="button" class="back-btn" id="btn-back-to-2">戻る</button>
+        <button type="submit" id="submitBtn">結果を見る</button>
+      </div>
+    </div>
   </form>
 
 <script>
-  // 1. 質問リスト
+  // --------------------------------------------------
+  // 1. 質問データ定義
+  // --------------------------------------------------
   const oooQuestions = [
     { id: 1, cat: "OCP", text: "クライエントが生きるうえで、作業がなぜ必要か説明できる" },
     { id: 2, cat: "OCP", text: "クライエントの健康・幸福のために、作業がなぜ必要か説明できる" },
@@ -84,94 +111,4 @@
     { id: 22, cat: "OBP", text: "クライエントが実際に作業に取り組むことを通して、自己認識（アイデンティティや成長の実感）の構築を支援できる" },
     { id: 23, cat: "OBP", text: "クライエントが居場所を手にいれるため、実際に作業に取り組むことを通して支援できる" },
     { id: 24, cat: "OBP", text: "クライエントの課題解決のために、なじみのある実際の生活環境で直接作業を用いた介入ができる" },
-    { id: 25, cat: "OBP", text: "クライエントのなじみのある生活環境で介入が困難な場合、可能な限り類似した環境で直接作業を用いた介入ができる" }
-  ];
-
-  // 2. 質問生成
-  const qArea = document.getElementById('questions-area');
-  let lastCat = "";
-  oooQuestions.forEach(q => {
-    if(q.cat !== lastCat){
-      const h3 = document.createElement('h3');
-      h3.innerText = q.cat === "OCP" ? "作業中心実践 (OCP)" : (q.cat === "OFP" ? "作業焦点実践 (OFP)" : "作業基盤実践 (OBP)");
-      qArea.appendChild(h3);
-      lastCat = q.cat;
-    }
-    const div = document.createElement('div'); div.className='question';
-    div.innerHTML = `<label class="q-label">【${q.id}】${q.text}</label>
-      <div class="option-group">${[1,2,3,4,5,6].map(v => `<div class="option-item"><label><input type="radio" name="q${q.id}" value="${v}" required><br>${v}</label></div>`).join('')}</div>`;
-    qArea.appendChild(div);
-  });
-
-  // 3. ステップ切り替えの制御
-  const steps = document.querySelectorAll('.step');
-  let currentStep = 0;
-  
-  const updateSteps = () => {
-    steps.forEach((s, i) => s.classList.toggle('active', i === currentStep));
-    window.scrollTo(0, 0);
-  };
-
-  // 「次へ」ボタン処理（クラス名 .next に対応）
-  document.querySelectorAll('.next').forEach(btn => {
-    btn.addEventListener('click', () => {
-      // 現在のステップ内の入力項目だけをチェック
-      const currentInputs = steps[currentStep].querySelectorAll('input, select');
-      let isValid = true;
-      for (const input of currentInputs) {
-        if (!input.checkValidity()) {
-          isValid = false;
-          input.reportValidity();
-          break;
-        }
-      }
-      if (isValid) {
-        currentStep++;
-        updateSteps();
-      }
-    });
-  });
-
-  // 「戻る」ボタン処理（クラス名 .prev に対応）
-  document.querySelectorAll('.prev').forEach(btn => {
-    btn.addEventListener('click', () => {
-      currentStep--;
-      updateSteps();
-    });
-  });
-
-  // 4. 送信処理
-  document.getElementById('ooo-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerText = "送信中...";
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    // 先生のGAS URL
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxhbR8pr3oiqYcyUAmU29ST7ffeHlc1JuzTUSY6WptS3eLlU7JRXitSW70jaBobOBb8tg/exec";
-
-    let ocp=0, ofp=0, obp=0;
-    oooQuestions.forEach(q => {
-      const v = Number(data[`q${q.id}`]);
-      if(q.cat==="OCP") ocp+=v; else if(q.cat==="OFP") ofp+=v; else obp+=v;
-    });
-
-    const payload = {
-      consent: data.consent==='yes', gender: data.gender, age: Number(data.age), degree: data.degree,
-      years_licensed: Number(data.yearsLicensed), specialty: data.specialty,
-      ocp_score: ocp, ofp_score: ofp, obp_score: obp, total_score: ocp+ofp+obp,
-      responses: data
-    };
-
-    try {
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
-      sessionStorage.setItem('ooo_result', JSON.stringify(payload));
-      window.location.href = 'result.html';
-    } catch(err) { 
-      alert("送信に失敗しました。"); 
-      btn.disabled = false; 
-      btn.innerText = "結果を見る";
-    }
-  });
-</script>
-</body>
-</html>
+    { id: 25, cat: "OBP", text: "クライエントのなじみのある生活

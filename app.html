@@ -33,21 +33,12 @@
   
   <form id="ooo-form">
     
-    <div id="step1" class="step-section active">
-      <h2>研究利用の同意</h2>
-      <p>入力されたデータは、統計的に処理され研究に利用される場合があります。</p>
-      <div style="margin: 20px 0;">
-        <label><input type="radio" name="consent" value="yes"> 同意する</label><br><br>
-        <label><input type="radio" name="consent" value="no"> 同意しない（結果表示のみ行います）</label>
-      </div>
-      <p id="error1" class="error-msg">※いずれかを選択してください</p>
-      <div class="controls">
-        <button type="button" id="btn-go-to-2">次へ</button>
-      </div>
-    </div>
-
-    <div id="step2" class="step-section">
+    <div id="step2" class="step-section active">
       <h2>プロフィール</h2>
+      <p style="font-size:0.9em; color:#666; margin-bottom:20px;">
+        回答データは統計的に処理され研究に利用される場合があります。<br>以下を入力して「質問回答へ」進んでください。
+      </p>
+
       <div style="margin-bottom:15px;">性別：<select name="gender" id="inp-gender"><option value="">選択</option><option value="男性">男性</option><option value="女性">女性</option><option value="その他">その他</option></select></div>
       <div style="margin-bottom:15px;">年齢：<input type="number" name="age" id="inp-age" min="18" max="100" placeholder="例: 30"> 歳</div>
       <div style="margin-bottom:15px;">取得学位：<select name="degree" id="inp-degree">
@@ -64,7 +55,6 @@
       <p id="error2" class="error-msg">※すべての項目を入力してください</p>
       
       <div class="controls">
-        <button type="button" class="back-btn" id="btn-back-to-1">戻る</button>
         <button type="button" id="btn-go-to-3">質問回答へ</button>
       </div>
     </div>
@@ -127,38 +117,16 @@
       <label class="q-label">【${q.id}】 ${q.text}</label>
       <div class="option-group">
         ${[1,2,3,4,5,6].map(v => 
-          `<div class="option-item"><label><input type="radio" name="q${q.id}" value="${v}"><br>${v}</label></div>`
+          `<div class="option-item"><label><input type="radio" name="q${q.id}" value="${v}" required><br>${v}</label></div>`
         ).join('')}
       </div>`;
     qArea.appendChild(div);
   });
 
   // 3. 画面遷移処理
-  const step1 = document.getElementById('step1');
   const step2 = document.getElementById('step2');
   const step3 = document.getElementById('step3');
   
-  // ▼同意画面の「次へ」
-  document.getElementById('btn-go-to-2').addEventListener('click', function() {
-    const consent = document.querySelector('input[name="consent"]:checked');
-    if (!consent) {
-      document.getElementById('error1').style.display = 'block';
-      alert("同意するかどうかを選択してください");
-      return;
-    }
-    document.getElementById('error1').style.display = 'none';
-    step1.classList.remove('active');
-    step2.classList.add('active');
-    window.scrollTo(0,0);
-  });
-
-  // ▼プロフィールの「戻る」
-  document.getElementById('btn-back-to-1').addEventListener('click', function() {
-    step2.classList.remove('active');
-    step1.classList.add('active');
-    window.scrollTo(0,0);
-  });
-
   // ▼プロフィールの「次へ」
   document.getElementById('btn-go-to-3').addEventListener('click', function() {
     const gender = document.getElementById('inp-gender').value;
@@ -168,71 +136,4 @@
     const specialty = document.getElementById('inp-specialty').value;
 
     if (!gender || !age || !degree || !years || !specialty) {
-      document.getElementById('error2').style.display = 'block';
-      alert("プロフィールのすべての項目を入力してください");
-      return;
-    }
-    document.getElementById('error2').style.display = 'none';
-    step2.classList.remove('active');
-    step3.classList.add('active');
-    window.scrollTo(0,0);
-  });
-
-  // ▼アンケートの「戻る」
-  document.getElementById('btn-back-to-2').addEventListener('click', function() {
-    step3.classList.remove('active');
-    step2.classList.add('active');
-    window.scrollTo(0,0);
-  });
-
-  // 4. 送信処理
-  document.getElementById('ooo-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const formData = new FormData(document.getElementById('ooo-form'));
-    const data = Object.fromEntries(formData.entries());
-    let allAnswered = true;
-    for(let i=1; i<=25; i++) { if(!data["q"+i]) allAnswered = false; }
-
-    if(!allAnswered) {
-      document.getElementById('error3').style.display = 'block';
-      alert("未回答の項目があります。");
-      return;
-    }
-
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.innerText = "送信中...";
-
-    // 先生のGAS URL
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxhbR8pr3oiqYcyUAmU29ST7ffeHlc1JuzTUSY6WptS3eLlU7JRXitSW70jaBobOBb8tg/exec";
-
-    let ocp=0, ofp=0, obp=0;
-    oooQuestions.forEach(q => {
-      const v = Number(data[`q${q.id}`]);
-      if(q.cat==="OCP") ocp+=v; else if(q.cat==="OFP") ofp+=v; else obp+=v;
-    });
-
-    const payload = {
-      consent: data.consent === 'yes',
-      gender: data.gender,
-      age: Number(data.age),
-      degree: data.degree,
-      years_licensed: Number(data.yearsLicensed),
-      specialty: data.specialty,
-      ocp_score: ocp, ofp_score: ofp, obp_score: obp, total_score: ocp+ofp+obp,
-      responses: data
-    };
-
-    try {
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
-      sessionStorage.setItem('ooo_result', JSON.stringify(payload));
-      window.location.href = 'result.html';
-    } catch(err) {
-      alert("送信エラーが発生しました。");
-      btn.disabled = false;
-      btn.innerText = "結果を見る";
-    }
-  });
-</script>
-</body>
-</html>
+      document.

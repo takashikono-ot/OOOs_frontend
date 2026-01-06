@@ -2,103 +2,44 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>OOOs 評価結果</title>
+  <title>OOOs 診断結果</title>
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: 'M PLUS Rounded 1c', sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #f9f9f9; color: #333; }
-    .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
-    h1 { color: #26466d; font-size: 1.8em; }
-    .score-display { font-size: 1.2em; margin: 20px 0; }
-    .total-score { font-size: 2.5em; font-weight: bold; color: #26466d; }
-    
-    /* ランク表示エリア */
-    .rank-section { background: #f0f4f8; padding: 15px; border-radius: 10px; margin: 20px 0; border: 2px dashed #26466d; }
-    .rank-title { font-weight: bold; font-size: 0.9em; color: #555; }
-    .rank-status { font-size: 1.4em; color: #e67e22; font-weight: bold; margin-top: 5px; }
-
-    /* グラフエリア */
-    .chart-container { position: relative; margin: auto; height: 300px; width: 100%; }
-    
-    .footer-btns { margin-top: 30px; }
-    button { background-color: #26466d; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 1em; }
-    button:hover { background-color: #1e3755; }
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #f9f9f9; text-align: center; }
+    .card { background: white; padding: 30px; border-radius: 15px; shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    h1 { color: #26466d; }
+    .rank-box { background: #fff8e1; border: 2px dashed #ffa000; padding: 15px; margin: 20px 0; font-weight: bold; }
+    .chart-container { width: 100%; height: 300px; margin-top: 20px; }
   </style>
 </head>
 <body>
-
-<div class="card">
-  <h1>評価結果</h1>
-
-  <div class="rank-section">
-    <div class="rank-title">潜在ランク（LRT）推定</div>
-    <div class="rank-status">🛠️ いま構築中</div>
-    <p style="font-size: 0.8em; color: #777; margin-top: 10px;">※現在は合計点に基づく簡易フィードバックのみ表示しています</p>
+  <div class="card">
+    <h1>診断結果</h1>
+    <div class="rank-box">
+      潜在ランク判定：<br><span style="font-size: 1.5em; color: #e67e22;">🛠️ いま構築中</span>
+    </div>
+    <p>合計点: <span id="total" style="font-size: 1.5em; font-weight: bold;">0</span> / 150</p>
+    <div class="chart-container"><canvas id="radar"></canvas></div>
+    <button onclick="location.href='index.html'" style="margin-top:20px; padding:10px 20px; background:#26466d; color:#fff; border:none; border-radius:4px; cursor:pointer;">トップへ戻る</button>
   </div>
-
-  <div class="score-display">
-    合計得点: <span class="total-score" id="totalScore">0</span> / 150
-  </div>
-
-  <div class="chart-container">
-    <canvas id="oooRadarChart"></canvas>
-  </div>
-
-  <div class="footer-btns">
-    <button onclick="location.href='index.html'">トップページへ戻る</button>
-  </div>
-</div>
 
 <script>
-  // 前のページから保存されたデータを取得
-  const resultData = JSON.parse(sessionStorage.getItem('ooo_result'));
+  const res = JSON.parse(sessionStorage.getItem('ooo_result'));
+  if(!res) { location.href='index.html'; }
+  document.getElementById('total').innerText = res.total_score;
 
-  if (!resultData) {
-    alert("データが見つかりませんでした。最初からやり直してください。");
-    location.href = 'index.html';
-  }
+  // 100点換算（OCP/OFPは48点、OBPは54点が満点）
+  const data = [ (res.ocp_score/48)*100, (res.ofp_score/48)*100, (res.obp_score/54)*100 ];
 
-  // 合計点を表示
-  document.getElementById('totalScore').innerText = resultData.total_score;
-
-  // 各因子の満点（OCP:8問=48, OFP:8問=48, OBP:9問=54）
-  // 比較しやすくするために100点満点に換算して表示します
-  const ocpPercent = (resultData.ocp_score / 48) * 100;
-  const ofpPercent = (resultData.ofp_score / 48) * 100;
-  const obpPercent = (resultData.obp_score / 54) * 100;
-
-  // レーダーチャートの描画
-  const ctx = document.getElementById('oooRadarChart').getContext('2d');
-  new Chart(ctx, {
+  new Chart(document.getElementById('radar'), {
     type: 'radar',
     data: {
       labels: ['OCP (作業中心)', 'OFP (作業焦点)', 'OBP (作業基盤)'],
-      datasets: [{
-        label: 'あなたの実践プロファイル',
-        data: [ocpPercent, ofpPercent, obpPercent],
-        backgroundColor: 'rgba(38, 70, 109, 0.2)',
-        borderColor: 'rgba(38, 70, 109, 1)',
-        borderWidth: 3,
-        pointBackgroundColor: 'rgba(38, 70, 109, 1)',
-        pointRadius: 5
-      }]
+      datasets: [{ data: data, backgroundColor: 'rgba(38,70,109,0.2)', borderColor: '#26466d', borderWidth: 2 }]
     },
-    options: {
-      scales: {
-        r: {
-          angleLines: { display: true },
-          suggestedMin: 0,
-          suggestedMax: 100,
-          ticks: { stepSize: 20, display: false } // 目盛り数字を非表示にしてスッキリさせる
-        }
-      },
-      plugins: {
-        legend: { display: false } // 凡例を非表示
-      }
-    }
+    options: { scales: { r: { suggestedMin: 0, suggestedMax: 100 } }, plugins: { legend: { display: false } } }
   });
 </script>
-
 </body>
 </html>

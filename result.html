@@ -2,148 +2,103 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>結果発表</title>
-  <style>
-    body{
-      font-family:'M PLUS Rounded 1c',sans-serif;
-      max-width:600px;margin:auto;padding:20px;position:relative;
-    }
-    h1{text-align:center;margin-bottom:1em;}
-    .result{display:none;text-align:center;}
-    .score-breakdown{display:none;margin:1em 0;font-size:1.1em;}
-    .back{margin-top:2em;text-align:center;}
-    .back a{color:#26466d;text-decoration:none;font-weight:bold;}
-    #chart-container{display:none;max-width:500px;margin:1em auto;}
-    .ooos-kun{position:absolute;bottom:10px;right:10px;width:120px;pointer-events:none;opacity:.8;}
-    #roman-loader{font-family:'M PLUS Rounded 1c',sans-serif;font-size:2rem;letter-spacing:.2em;color:#26466d;text-align:center;margin:2em auto;}
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OOOs 評価結果</title>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: 'M PLUS Rounded 1c', sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #f9f9f9; color: #333; }
+    .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; }
+    h1 { color: #26466d; font-size: 1.8em; }
+    .score-display { font-size: 1.2em; margin: 20px 0; }
+    .total-score { font-size: 2.5em; font-weight: bold; color: #26466d; }
+    
+    /* ランク表示エリア */
+    .rank-section { background: #f0f4f8; padding: 15px; border-radius: 10px; margin: 20px 0; border: 2px dashed #26466d; }
+    .rank-title { font-weight: bold; font-size: 0.9em; color: #555; }
+    .rank-status { font-size: 1.4em; color: #e67e22; font-weight: bold; margin-top: 5px; }
+
+    /* グラフエリア */
+    .chart-container { position: relative; margin: auto; height: 300px; width: 100%; }
+    
+    .footer-btns { margin-top: 30px; }
+    button { background-color: #26466d; color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-size: 1em; }
+    button:hover { background-color: #1e3755; }
+  </style>
 </head>
 <body>
-  <h1>あなたの潜在ランク</h1>
 
-  <!-- ローディングアニメ -->
-  <div id="roman-loader">O</div>
+<div class="card">
+  <h1>評価結果</h1>
 
-  <!-- 結果表示エリア -->
-  <div id="status"        class="result"></div>
-  <div id="breakdown"     class="score-breakdown"></div>
-
-  <div id="chart-container">
-    <canvas id="prob-chart"></canvas>
+  <div class="rank-section">
+    <div class="rank-title">潜在ランク（LRT）推定</div>
+    <div class="rank-status">🛠️ いま構築中</div>
+    <p style="font-size: 0.8em; color: #777; margin-top: 10px;">※現在は合計点に基づく簡易フィードバックのみ表示しています</p>
   </div>
 
-  <div class="back">
-    <a href="https://ooos-toppage.netlify.app/">&larr; トップページに戻る</a>
+  <div class="score-display">
+    合計得点: <span class="total-score" id="totalScore">0</span> / 150
   </div>
 
-  <img src="オーズくん背景透過.png" alt="オーズくん" class="ooos-kun">
+  <div class="chart-container">
+    <canvas id="oooRadarChart"></canvas>
+  </div>
 
-  <script>
-  /* ---------------- ローディングアニメ ---------------- */
-  const loader   = document.getElementById('roman-loader');
-  const maxCount = 5;
-  let   count    = 1;
-  const intervalId = setInterval(()=>{
-    count = (count < maxCount) ? count + 1 : 1;
-    loader.textContent = 'O'.repeat(count);
-  },400);
+  <div class="footer-btns">
+    <button onclick="location.href='index.html'">トップページへ戻る</button>
+  </div>
+</div>
 
-  /* ---------------- メイン処理 ---------------- */
-  (async ()=>{
-    const statusEl      = document.getElementById('status');
-    const breakdownEl   = document.getElementById('breakdown');
-    const chartContainer= document.getElementById('chart-container');
-    const ctx           = document.getElementById('prob-chart').getContext('2d');
+<script>
+  // 前のページから保存されたデータを取得
+  const resultData = JSON.parse(sessionStorage.getItem('ooo_result'));
 
-    try{
-      /* 1. sessionStorage から回答を取得 */
-      const raw = sessionStorage.getItem('ooo_responses');
-      if(!raw) throw new Error('responses が見つかりません');
-      const allData  = JSON.parse(raw);
+  if (!resultData) {
+    alert("データが見つかりませんでした。最初からやり直してください。");
+    location.href = 'index.html';
+  }
 
-      /* 2. q1–q42 を数値配列へ */
-      const responses = Array.from({length:42},(_,i)=>
-        parseInt(allData[`q${i+1}`],10)
-      );
+  // 合計点を表示
+  document.getElementById('totalScore').innerText = resultData.total_score;
 
-      /* 3. カテゴリ別スコア計算 */
-      const sum = arr=>arr.reduce((a,b)=>a+b,0);
-      const ocp = sum(responses.slice(0 ,14));
-      const ofp = sum(responses.slice(14,28));
-      const obp = sum(responses.slice(28,42));
-      const total = ocp+ofp+obp;
+  // 各因子の満点（OCP:8問=48, OFP:8問=48, OBP:9問=54）
+  // 比較しやすくするために100点満点に換算して表示します
+  const ocpPercent = (resultData.ocp_score / 48) * 100;
+  const ofpPercent = (resultData.ofp_score / 48) * 100;
+  const obpPercent = (resultData.obp_score / 54) * 100;
 
-      /* 4. バックエンドへ POST */
-      const res = await fetch(
-        "https://ooos-backend.onrender.com/predict",
-        {
-          method : "POST",
-          headers: { "Content-Type": "application/json" },
-          body   : JSON.stringify({ responses })   // 42 項目だけ送信
+  // レーダーチャートの描画
+  const ctx = document.getElementById('oooRadarChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: ['OCP (作業中心)', 'OFP (作業焦点)', 'OBP (作業基盤)'],
+      datasets: [{
+        label: 'あなたの実践プロファイル',
+        data: [ocpPercent, ofpPercent, obpPercent],
+        backgroundColor: 'rgba(38, 70, 109, 0.2)',
+        borderColor: 'rgba(38, 70, 109, 1)',
+        borderWidth: 3,
+        pointBackgroundColor: 'rgba(38, 70, 109, 1)',
+        pointRadius: 5
+      }]
+    },
+    options: {
+      scales: {
+        r: {
+          angleLines: { display: true },
+          suggestedMin: 0,
+          suggestedMax: 100,
+          ticks: { stepSize: 20, display: false } // 目盛り数字を非表示にしてスッキリさせる
         }
-      );
-
-      const txt = await res.text();
-      if(!res.ok) throw new Error(`HTTP ${res.status}: ${txt}`);
-      const json = JSON.parse(txt); // { rank_probs:[…], estimated_rank:… }
-
-      /* 5. アニメ停止・画面表示 */
-      clearInterval(intervalId);
-      loader.style.display = 'none';
-
-      statusEl.style.display      = 'block';
-      breakdownEl.style.display   = 'block';
-      chartContainer.style.display= 'block';
-
-      /* 6. テキスト出力 */
-      statusEl.innerHTML =
-        `推定ランク：<strong>${json.estimated_rank}</strong><br>`+
-        `（確率：${json.rank_probs.map(p=>(p*100).toFixed(1)).join('%, ')}%）`;
-
-      breakdownEl.innerHTML =
-        `OCP: ${ocp} 点<br>`+
-        `OFP: ${ofp} 点<br>`+
-        `OBP: ${obp} 点<br>`+
-        `<strong>合計: ${total} 点</strong>`;
-
-      /* 7. 棒グラフ描画 */
-      new Chart(ctx,{
-        type:'bar',
-        data:{
-          labels:['Rank 1','Rank 2','Rank 3','Rank 4','Rank 5','Rank 6','Rank 7'],
-          datasets:[{
-            label:'所属確率（％）',
-            data : json.rank_probs.map(p=>p*100),
-            borderWidth:1
-          }]
-        },
-        options:{
-          scales:{
-            y:{
-              beginAtZero:true,
-              ticks:{callback:v=>v+'%'}
-            }
-          },
-          plugins:{
-            legend:{display:false},
-            tooltip:{
-              callbacks:{
-                label:c=>`${c.parsed.y.toFixed(1)}%`
-              }
-            }
-          }
-        }
-      });
-
-    }catch(err){
-      console.error('エラー詳細:',err);
-      clearInterval(intervalId);
-      loader.style.display = 'none';
-      statusEl.style.display= 'block';
-      statusEl.textContent = 'サーバーエラーが発生しました。コンソールをご確認ください。';
+      },
+      plugins: {
+        legend: { display: false } // 凡例を非表示
+      }
     }
-  })();
-  </script>
+  });
+</script>
+
 </body>
 </html>

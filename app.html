@@ -31,7 +31,7 @@
         <label><input type="radio" name="consent" value="yes" required> 同意する</label><br><br>
         <label><input type="radio" name="consent" value="no"> 同意しない（結果表示のみ行います）</label>
       </div>
-      <div class="controls"><button type="button" class="next-btn">次へ</button></div>
+      <div class="controls"><button type="button" class="next">次へ</button></div>
     </section>
 
     <section class="step">
@@ -48,17 +48,17 @@
         <option value="">選択</option><option value="身体障害">身体障害</option><option value="精神障害">精神障害</option>
         <option value="発達障害">発達障害</option><option value="老年期障害">老年期障害</option><option value="その他">その他</option>
       </select></div>
-      <div class="controls"><button type="button" class="prev-btn">戻る</button><button type="button" class="next-btn">質問回答へ</button></div>
+      <div class="controls"><button type="button" class="prev">戻る</button><button type="button" class="next">質問回答へ</button></div>
     </section>
 
     <section class="step">
       <div id="questions-area"></div>
-      <div class="controls"><button type="button" class="prev-btn">戻る</button><button type="submit" id="submitBtn">結果を見る</button></div>
+      <div class="controls"><button type="button" class="prev">戻る</button><button type="submit" id="submitBtn">結果を見る</button></div>
     </section>
   </form>
 
 <script>
-  // 1. 質問リストの定義（25項目）
+  // 1. 質問リスト
   const oooQuestions = [
     { id: 1, cat: "OCP", text: "クライエントが生きるうえで、作業がなぜ必要か説明できる" },
     { id: 2, cat: "OCP", text: "クライエントの健康・幸福のために、作業がなぜ必要か説明できる" },
@@ -87,7 +87,7 @@
     { id: 25, cat: "OBP", text: "クライエントのなじみのある生活環境で介入が困難な場合、可能な限り類似した環境で直接作業を用いた介入ができる" }
   ];
 
-  // 2. 質問の自動生成
+  // 2. 質問生成
   const qArea = document.getElementById('questions-area');
   let lastCat = "";
   oooQuestions.forEach(q => {
@@ -97,18 +97,13 @@
       qArea.appendChild(h3);
       lastCat = q.cat;
     }
-    const div = document.createElement('div');
-    div.className = 'question';
-    div.innerHTML = `
-      <label class="q-label">【${q.id}】 ${q.text}</label>
-      <div class="option-group">
-        ${[1,2,3,4,5,6].map(v => `<div class="option-item"><label><input type="radio" name="q${q.id}" value="${v}" required><br>${v}</label></div>`).join('')}
-      </div>
-    `;
+    const div = document.createElement('div'); div.className='question';
+    div.innerHTML = `<label class="q-label">【${q.id}】${q.text}</label>
+      <div class="option-group">${[1,2,3,4,5,6].map(v => `<div class="option-item"><label><input type="radio" name="q${q.id}" value="${v}" required><br>${v}</label></div>`).join('')}</div>`;
     qArea.appendChild(div);
   });
 
-  // 3. ステップ切り替えの制御（★ここを修正しました）
+  // 3. ステップ切り替えの制御
   const steps = document.querySelectorAll('.step');
   let currentStep = 0;
   
@@ -117,23 +112,19 @@
     window.scrollTo(0, 0);
   };
 
-  // 「次へ」ボタンの処理
+  // 「次へ」ボタン処理（クラス名 .next に対応）
   document.querySelectorAll('.next').forEach(btn => {
     btn.addEventListener('click', () => {
-      // 現在表示されているステップ(steps[currentStep])の中にある入力項目だけをチェックする
+      // 現在のステップ内の入力項目だけをチェック
       const currentInputs = steps[currentStep].querySelectorAll('input, select');
       let isValid = true;
-      
-      // ひとつずつチェック
       for (const input of currentInputs) {
         if (!input.checkValidity()) {
           isValid = false;
-          input.reportValidity(); // エラーメッセージを表示
-          break; // 最初のエラーで止める
+          input.reportValidity();
+          break;
         }
       }
-
-      // 全部OKなら次へ
       if (isValid) {
         currentStep++;
         updateSteps();
@@ -141,7 +132,7 @@
     });
   });
 
-  // 「戻る」ボタンの処理
+  // 「戻る」ボタン処理（クラス名 .prev に対応）
   document.querySelectorAll('.prev').forEach(btn => {
     btn.addEventListener('click', () => {
       currentStep--;
@@ -152,12 +143,10 @@
   // 4. 送信処理
   document.getElementById('ooo-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const btn = document.getElementById('submitBtn'); 
-    btn.disabled = true; 
-    btn.innerText = "送信中...";
-    
+    const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.innerText = "送信中...";
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
+    // 先生のGAS URL
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxhbR8pr3oiqYcyUAmU29ST7ffeHlc1JuzTUSY6WptS3eLlU7JRXitSW70jaBobOBb8tg/exec";
 
     let ocp=0, ofp=0, obp=0;
@@ -184,6 +173,5 @@
     }
   });
 </script>
-  
 </body>
 </html>

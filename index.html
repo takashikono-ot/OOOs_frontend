@@ -61,6 +61,7 @@
     .num-btn {
       width: 50px; height: 50px; background-color: #e9ecef; color: #26466d; font-size: 1.5em; font-weight: bold;
       border: 1px solid #ccc; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0;
+      touch-action: manipulation; user-select: none; -webkit-user-select: none;
     }
     .num-btn:hover { background-color: #dde2e6; transform: none; box-shadow: none; }
     .num-btn:active { background-color: #ccc; }
@@ -89,6 +90,10 @@
     .legend-score { font-weight: bold; font-size: 1.2em; color: #26466d; text-align: center; }
     .legend-title { font-weight: bold; display: block; margin-bottom: 4px; }
     .legend-desc { color: #555; font-size: 0.9em; }
+
+    select.input-error { border: 2px solid #d9534f !important; background-color: #fff5f5; }
+    input[type="number"].input-error { border: 2px solid #d9534f !important; background-color: #fff5f5; }
+    .input-error-label { color: #d9534f; font-size: 0.85em; margin-top: 4px; display: block; }
 
     @media (max-width: 600px) {
       .option-group { flex-wrap: wrap; }
@@ -306,10 +311,29 @@
   document.getElementById('btn-go-to-3').addEventListener('click', function() {
     const ids = ['inp-gender','inp-age','inp-degree','inp-years','inp-specialty'];
     let ok = true;
-    ids.forEach(id => { if(!document.getElementById(id).value) ok = false; });
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      // 既存エラー表示をリセット
+      el.classList.remove('input-error');
+      const existingMsg = el.parentElement.querySelector('.input-error-label');
+      if (existingMsg) existingMsg.remove();
+
+      if (!el.value) {
+        ok = false;
+        el.classList.add('input-error');
+        const msg = document.createElement('span');
+        msg.className = 'input-error-label';
+        msg.textContent = '⚠ 入力してください';
+        el.parentElement.appendChild(msg);
+      }
+    });
     
     if (!ok) {
-      document.getElementById('error2').style.display = 'block'; alert("未入力の項目があります"); return;
+      document.getElementById('error2').style.display = 'block';
+      // 最初のエラー箇所までスクロール
+      const firstError = document.querySelector('#step2 .input-error');
+      if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
     }
     document.getElementById('error2').style.display = 'none';
     step2.classList.remove('active'); step3.classList.add('active'); window.scrollTo(0,0);

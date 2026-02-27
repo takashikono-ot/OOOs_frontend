@@ -96,8 +96,10 @@
     .input-error-label { color: #d9534f; font-size: 0.85em; margin-top: 4px; display: block; }
 
     @media (max-width: 600px) {
-      .option-group { flex-wrap: wrap; }
-      .option-item { flex: 1 0 30%; margin-bottom: 10px; }
+      .option-group { flex-wrap: nowrap; gap: 3px; }
+      .option-item { flex: 1; min-width: 0; }
+      .option-item label { padding: 12px 2px; font-size: 0.95em; }
+      .option-item input[type="radio"] { transform: scale(1.2); }
       .sticky-legend { padding: 10px; margin: -30px -30px 20px -30px; }
       .legend-content { max-height: 150px; }
     }
@@ -182,12 +184,12 @@
         <div style="text-align:center; font-weight:bold; color:#26466d; margin-bottom:5px;">▼ 回答の目安（スクロールして確認できます）</div>
         <div class="legend-content">
           <table class="legend-table">
-            <tr><td class="legend-score">6</td><td><span class="legend-title">できる</span><span class="legend-desc">根拠を持って実践でき、他者への指導や、応用的な場面や事例への対応した実践ができる。</span></td></tr>
-            <tr><td class="legend-score">5</td><td><span class="legend-title">ほとんどできる</span><span class="legend-desc">理屈や意味を理解しており、標準的な場面であれば、自信を持って実践できる。</span></td></tr>
-            <tr><td class="legend-score">4</td><td><span class="legend-title">ある程度できる</span><span class="legend-desc">手順や方法は理解しており、質や結果にムラはあるものの、実践できる。</span></td></tr>
-            <tr><td class="legend-score">3</td><td><span class="legend-title">あまりできない</span><span class="legend-desc">必要性は理解している。マニュアルや手順を確認したり、助言を得たりすれば実践できる。</span></td></tr>
-            <tr><td class="legend-score">2</td><td><span class="legend-title">ほとんどできない</span><span class="legend-desc">その項目が具体的に何をすることか（目的・方法）を正しく説明できるが、実践はほとんどしたことがない。</span></td></tr>
             <tr><td class="legend-score">1</td><td><span class="legend-title">できない</span><span class="legend-desc">用語を知らない、又は用語は見聞きしたことがあるが、具体的にどういうことかは説明できず実践はしたことがない、又はできない。</span></td></tr>
+            <tr><td class="legend-score">2</td><td><span class="legend-title">ほとんどできない</span><span class="legend-desc">その項目が具体的に何をすることか（目的・方法）を正しく説明できるが、実践はほとんどしたことがない。</span></td></tr>
+            <tr><td class="legend-score">3</td><td><span class="legend-title">あまりできない</span><span class="legend-desc">必要性は理解している。マニュアルや手順を確認したり、助言を得たりすれば実践できる。</span></td></tr>
+            <tr><td class="legend-score">4</td><td><span class="legend-title">ある程度できる</span><span class="legend-desc">手順や方法は理解しており、質や結果にムラはあるものの、実践できる。</span></td></tr>
+            <tr><td class="legend-score">5</td><td><span class="legend-title">ほとんどできる</span><span class="legend-desc">理屈や意味を理解しており、標準的な場面であれば、自信を持って実践できる。</span></td></tr>
+            <tr><td class="legend-score">6</td><td><span class="legend-title">できる</span><span class="legend-desc">根拠を持って実践でき、他者への指導や、応用的な場面や事例への対応した実践ができる。</span></td></tr>
           </table>
         </div>
       </div>

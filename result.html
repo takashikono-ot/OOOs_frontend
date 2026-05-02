@@ -11,37 +11,46 @@
     .card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     h1 { color: #26466d; margin-bottom: 20px; }
     h2 { color: #26466d; border-bottom: 2px solid #26466d; padding-bottom: 10px; margin-top: 40px; margin-bottom: 20px; text-align: left; }
-    
+
     /* 得点表示エリア */
     .score-container { margin-bottom: 20px; }
     .total-score { font-size: 1.4em; font-weight: bold; margin-bottom: 15px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
     .total-val { font-size: 1.8em; color: #26466d; }
-    
+
     .sub-scores { display: flex; justify-content: space-around; background: #f8f9fa; padding: 15px; border-radius: 8px; font-size: 0.9em; }
     .sub-item strong { display: block; color: #26466d; font-size: 1.1em; margin-bottom: 5px; }
-    
+
     /* チャートエリア */
-    .chart-container { 
-      position: relative; 
-      width: 100%; 
-      height: 400px; 
-      margin: 20px auto; 
+    .chart-container {
+      position: relative;
+      width: 100%;
+      height: 400px;
+      margin: 20px auto;
     }
-    
+
     /* 回答一覧リスト */
     .answer-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; text-align: left; }
     .answer-table th { background: #26466d; color: white; padding: 10px; text-align: center; }
     .answer-table td { border-bottom: 1px solid #ddd; padding: 10px; }
     .answer-table tr:nth-child(even) { background-color: #f9f9f9; }
     .ans-num { font-weight: bold; color: #26466d; text-align: center; width: 50px; }
+    .ans-cat { text-align: center; width: 60px; font-weight: bold; color: #26466d; }
     .ans-val { font-weight: bold; font-size: 1.1em; text-align: center; width: 60px; }
-    
+
     /* ランク判定ボックス */
     .rank-box { background: #fff8e1; border: 3px dashed #ffa000; padding: 20px; margin: 30px 0; border-radius: 10px; }
     .rank-title { font-weight: bold; display: block; margin-bottom: 10px; font-size: 1.1em; }
-    
+
+    .quality-note { color: #777; font-size: 0.85em; margin-top: 12px; }
     .btn { display: inline-block; background: #26466d; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; transition: 0.3s; font-weight: bold; margin-top: 20px; }
     .btn:hover { background: #1e3755; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+
+    @media (max-width: 600px) {
+      .card { padding: 22px; }
+      .sub-scores { gap: 8px; }
+      .answer-table { font-size: 0.82em; }
+      .answer-table td, .answer-table th { padding: 8px 6px; }
+    }
   </style>
 </head>
 <body>
@@ -63,10 +72,10 @@
   <div class="chart-container">
     <canvas id="oooChart"></canvas>
   </div>
-  
+
   <div class="rank-box">
     <span class="rank-title">あなたの潜在ランク判定</span>
-    <span style="font-size: 1.8em; color: #e67e22; font-weight:bold;">🛠️ いま構築中</span>
+    <span style="font-size: 1.8em; color: #e67e22; font-weight:bold;">いま構築中</span>
     <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
       ※現在、多くのデータを集めて推定ロジックを作成しています。
     </p>
@@ -77,19 +86,20 @@
     <thead>
       <tr>
         <th>No.</th>
+        <th>分類</th>
         <th>質問項目</th>
         <th>回答</th>
       </tr>
     </thead>
-    <tbody id="answer-list-body">
-      </tbody>
+    <tbody id="answer-list-body"></tbody>
   </table>
+
+  <p class="quality-note" id="quality-note"></p>
 
   <a href="index.html" class="btn">トップへ戻る</a>
 </div>
 
 <script>
-  // 保存された結果を取得
   const res = JSON.parse(sessionStorage.getItem('ooo_result'));
 
   if (!res) {
@@ -97,13 +107,11 @@
     location.href = 'index.html';
   }
 
-  // --- 得点表示 ---
   document.getElementById('totalScore').innerText = res.total_score;
   document.getElementById('ocpVal').innerText = res.ocp_score;
   document.getElementById('ofpVal').innerText = res.ofp_score;
   document.getElementById('obpVal').innerText = res.obp_score;
 
-  // --- レーダーチャート ---
   const ocpRate = (res.ocp_score / 48) * 100;
   const ofpRate = (res.ofp_score / 48) * 100;
   const obpRate = (res.obp_score / 54) * 100;
@@ -131,7 +139,7 @@
         r: {
           suggestedMin: 0,
           suggestedMax: 100,
-          ticks: { display: false }, /* 100分の記載を消す */
+          ticks: { display: false },
           pointLabels: {
             font: { size: 14, weight: 'bold', family: "'M PLUS Rounded 1c', sans-serif" },
             color: '#26466d'
@@ -140,55 +148,55 @@
       },
       plugins: {
         legend: { display: false },
-        tooltip: { enabled: false } /* ツールチップもシンプルに消す */
+        tooltip: { enabled: false }
       }
     }
   });
 
-  // --- 回答一覧の生成 ---
-  // 質問文データ（index.htmlと同じもの）
   const oooQuestions = [
-    { id: 1, text: "クライエントが生きるうえで、作業がなぜ必要か説明できる" },
-    { id: 2, text: "クライエントの健康・幸福のために、作業がなぜ必要か説明できる" },
-    { id: 3, text: "クライエントにとって、作業の意味や価値の重要性を解釈できる" },
-    { id: 4, text: "クライエントの作業に関する物理的・社会的環境の側面を認識できる" },
-    { id: 5, text: "クライエントの作業が、文化的背景や社会的規範によってどのように形作られているか理解できる" },
-    { id: 6, text: "クライエントの作業の過去・現在・未来の連続性を解釈できる" },
-    { id: 7, text: "クライエントの作業に関する課題に対し、作業の視点を主軸に据え、多様なリーズニングを使い分けて方針を決定できる" },
-    { id: 8, text: "クライエントが直面する課題を、身体機能や精神機能だけでなく、作業との関連で捉えることができる" },
-    { id: 9, text: "クライエントにとって意味のある作業を特定できる" },
-    { id: 10, text: "クライエントの作業に対する主観的な経験（重要度、実行度など）を評価できる" },
-    { id: 11, text: "クライエントの現在の役割や習慣が作業に与える影響を評価し、介入計画を立案できる" },
-    { id: 12, text: "クライエントの現在の作業に関する課題を明確にすることができる" },
-    { id: 13, text: "クライエントと協働し、作業に関する目標を設定できる" },
-    { id: 14, text: "クライエントの作業に関する目標に対し、達成度を継続的に評価することができる" },
-    { id: 15, text: "クライエントに作業の意味や価値への気づきを促すことができる" },
-    { id: 16, text: "クライエントの作業への参加を促進するため、周囲の理解を深め、支援的な環境を整えることができる" },
-    { id: 17, text: "クライエントが実際に行う作業の質を、観察評価できる" },
-    { id: 18, text: "クライエントが実際に行う作業を観察し、人・環境・作業の相互関係を分析できる" },
-    { id: 19, text: "クライエントに合う作業を見つけるため、実際の作業を試すことができる" },
-    { id: 20, text: "クライエントの作業に関する課題を解決するために、作業の難易度を段階づけることができる" },
-    { id: 21, text: "クライエントが実際の作業を行う過程で、手本・介助・助言や問いかけを使い分け、最適なやり方の習得を支援できる" },
-    { id: 22, text: "クライエントが実際に作業に取り組むことを通して、自己認識（アイデンティティや成長の実感）の構築を支援できる" },
-    { id: 23, text: "クライエントが居場所を手にいれるため、実際に作業に取り組むことを通して支援できる" },
-    { id: 24, text: "クライエントの課題解決のために、なじみのある実際の生活環境で直接作業を用いた介入ができる" },
-    { id: 25, text: "クライエントのなじみのある生活環境で介入が困難な場合、可能な限り類似した環境で直接作業を用いた介入ができる" }
+    { id: 1, cat: "OFP", text: "クライエントにとって意味のある作業を特定できる。" },
+    { id: 2, cat: "OBP", text: "クライエントの作業に関する課題を解決するために、作業の難易度を段階づけることができる。" },
+    { id: 3, cat: "OCP", text: "クライエントの作業に影響する環境要因（道具・空間・人的支援など）を把握できる。" },
+    { id: 4, cat: "OFP", text: "クライエントの現在の作業に関する課題を明確にすることができる。" },
+    { id: 5, cat: "OBP", text: "クライエントに合う作業を見つけるため、実際の作業を体験する機会を提供できる。" },
+    { id: 6, cat: "OFP", text: "クライエントと協働し、作業に関する目標を設定できる。" },
+    { id: 7, cat: "OCP", text: "クライエントの健康・幸福のために、作業がなぜ必要か説明できる。" },
+    { id: 8, cat: "OFP", text: "クライエントの作業に対する主観的な経験（重要度、実行度など）を評価できる。" },
+    { id: 9, cat: "OBP", text: "クライエントが実際に行う作業を観察し、人・環境・作業の相互関係を分析できる。" },
+    { id: 10, cat: "OCP", text: "クライエントにとっての作業の意味や価値がなぜ重要か説明できる。" },
+    { id: 11, cat: "OFP", text: "クライエントの作業に関する課題と、役割や習慣の関係を評価し、介入計画を立案できる。" },
+    { id: 12, cat: "OBP", text: "クライエントが実際に行う作業の質（努力性・効率性・安全性・自立性）を観察評価できる。" },
+    { id: 13, cat: "OCP", text: "クライエントの作業を、過去・現在・未来という時系列のつながりとして捉えることができる。" },
+    { id: 14, cat: "OFP", text: "クライエントの作業に関する目標の達成度を継続的に評価することができる。" },
+    { id: 15, cat: "OBP", text: "クライエントが実際の作業を行う過程で、手本・介助・助言や問いかけを使い分け、最適な方法の習得を支援できる。" },
+    { id: 16, cat: "OCP", text: "クライエントが直面する課題を、身体機能や精神機能だけでなく、作業との関連で捉えることができる。" },
+    { id: 17, cat: "OFP", text: "クライエントに作業の意味や価値への気づきを促すことができる。" },
+    { id: 18, cat: "OBP", text: "クライエントが作業を通して、自分らしく生きているという実感がもてるよう支援できる。" },
+    { id: 19, cat: "OCP", text: "クライエントの作業が、所属する集団の慣習や社会的背景の影響を受けることを理解できる。" },
+    { id: 20, cat: "OFP", text: "クライエントの作業への参加のため、周囲の理解を促し、支援的な環境を整えるよう働きかけることができる。" },
+    { id: 21, cat: "OBP", text: "クライエントが役割や居場所を得られるよう、実際の作業を用いて支援できる。" },
+    { id: 22, cat: "OCP", text: "クライエントが生きるうえで、作業がなぜ必要か説明できる。" },
+    { id: 23, cat: "OBP", text: "クライエントの課題解決のため、なじみのある生活環境（自宅・地域など）で作業を用いた介入ができる。" },
+    { id: 24, cat: "OBP", text: "クライエントのなじみのある生活環境（自宅・地域など）で介入が困難な場合、類似した模擬的な環境で作業を用いた介入ができる。" },
+    { id: 25, cat: "OCP", text: "クライエントの作業に関する課題に対して、状況に応じた多様な専門的推論（リーズニング）を使い分けることができる。" }
   ];
 
   const tbody = document.getElementById('answer-list-body');
   oooQuestions.forEach(q => {
     const tr = document.createElement('tr');
-    // sessionStorageに保存された回答データ(q1, q2...)を取得
     const val = res.responses['q' + q.id];
-    
+
     tr.innerHTML = `
       <td class="ans-num">${q.id}</td>
+      <td class="ans-cat">${q.cat}</td>
       <td>${q.text}</td>
       <td class="ans-val">${val}</td>
     `;
     tbody.appendChild(tr);
   });
 
+  document.getElementById('quality-note').innerText =
+    res.quality_check_passed ? '' : '※回答内容の確認が必要な項目があります。';
 </script>
 
 </body>

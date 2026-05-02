@@ -7,29 +7,45 @@
   <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&display=swap" rel="stylesheet">
   <style>
     /* 基本設定 */
-    body { 
-      font-family: 'M PLUS Rounded 1c', sans-serif; 
-      max-width: 800px; 
-      margin: auto; 
-      padding: 20px; 
-      padding-top: 40px; 
-      background-color: #f4f7f9; 
-      font-size: 18px; 
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      max-width: 800px;
+      margin: auto;
+      padding: 20px;
+      padding-top: 40px;
+      background-color: #f4f7f9;
+      font-size: 18px;
       line-height: 1.6;
       color: #333;
     }
 
     h1 { text-align:center; color: #26466d; margin-bottom: 1em; }
-    
+
     .step-section { display: none; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
     .step-section.active { display: block; }
-    
+
     h2 { border-bottom: 2px solid #26466d; padding-bottom: 10px; margin-bottom: 20px; color: #26466d; font-size: 1.4em; }
-    h3 { margin-top: 2.5em; padding: 0.8em; background-color: #26466d; color: #fff; border-radius: 8px; text-align: center; font-size: 1.2em; }
-    
-    .question { margin: 3em 0; padding-bottom: 2em; border-bottom: 1px dashed #ccc; }
+
+    .question { margin: 2.5em 0; padding-bottom: 2em; border-bottom: 1px dashed #ccc; }
     .q-label { font-weight: bold; display: block; margin-bottom: 1.2em; font-size: 1.1em; }
-    
+    .cat-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 3.2em;
+      margin: 0 0.35em 0.35em 0;
+      padding: 0.1em 0.45em;
+      border-radius: 6px;
+      color: #17324d;
+      font-size: 0.85em;
+      line-height: 1.5;
+      vertical-align: middle;
+    }
+    .cat-ocp { background: #dcecf7; }
+    .cat-ofp { background: #fff2c9; }
+    .cat-obp { background: #e0efd9; }
+    .cat-check { background: #f8f9fa; color: #17324d; }
+
     /* ラジオボタン */
     .option-group { display: flex; justify-content: space-between; gap: 5px; }
     .option-item { flex: 1; text-align: center; }
@@ -42,18 +58,18 @@
 
     /* コントロールボタン */
     .controls { text-align: center; margin-top: 3em; }
-    button { 
-      background-color: #26466d; color: #fff; border: none; border-radius: 8px; padding: 15px 40px; 
+    button {
+      background-color: #26466d; color: #fff; border: none; border-radius: 8px; padding: 15px 40px;
       cursor: pointer; font-weight: bold; font-size: 1.1em; transition: all 0.3s ease; margin: 10px;
     }
     button:hover:not(:disabled) { background-color: #1e3755; transform: translateY(-3px); box-shadow: 0 6px 12px rgba(0,0,0,0.2); }
     button:disabled { background-color: #ccc; cursor: not-allowed; }
     button.back-btn { background-color: #888; }
     button.back-btn:hover { background-color: #666; }
-    
+
     /* 入力フォーム共通 */
     select { padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; min-width: 150px; }
-    
+
     /* 数値入力用のカスタムデザイン */
     .number-control-group {
       display: flex; align-items: center; gap: 10px;
@@ -65,12 +81,12 @@
     }
     .num-btn:hover { background-color: #dde2e6; transform: none; box-shadow: none; }
     .num-btn:active { background-color: #ccc; }
-    
-    input[type="number"] { 
-      padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1.2em; width: 80px; text-align: center; -moz-appearance: textfield; 
+
+    input[type="number"] {
+      padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1.2em; width: 80px; text-align: center; -moz-appearance: textfield;
     }
     input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    
+
     .error-msg { color: #d9534f; font-weight: bold; display: none; margin-bottom: 20px; padding: 10px; background: #fdf7f7; border-left: 5px solid #d9534f; }
     .consent-box { background-color: #f0f7ff; padding: 25px; border-radius: 8px; border-left: 6px solid #26466d; margin-bottom: 25px; }
 
@@ -96,23 +112,26 @@
     .input-error-label { color: #d9534f; font-size: 0.85em; margin-top: 4px; display: block; }
 
     @media (max-width: 600px) {
+      body { padding: 14px; padding-top: 34px; font-size: 16px; }
+      .step-section { padding: 22px; }
       .option-group { flex-wrap: nowrap; gap: 3px; }
       .option-item { flex: 1; min-width: 0; }
       .option-item label { padding: 12px 2px; font-size: 0.95em; }
       .option-item input[type="radio"] { transform: scale(1.2); }
-      .sticky-legend { padding: 10px; margin: -30px -30px 20px -30px; }
+      .sticky-legend { padding: 10px; margin: -22px -22px 20px -22px; }
       .legend-content { max-height: 150px; }
+      button { width: 100%; margin: 8px 0; }
     }
   </style>
 </head>
 <body>
-  
+
   <div id="progress-container"><div id="progress-bar"></div></div>
 
   <h1>OOOs チェック</h1>
-  
-  <form id="ooo-form">
-    
+
+  <form id="ooo-form" autocomplete="off">
+
     <div id="step1" class="step-section active">
       <h2>研究利用の同意</h2>
       <div class="consent-box">
@@ -124,16 +143,16 @@
       </p>
       <div style="margin: 30px 0;">
         <label style="display:block; margin-bottom:20px; cursor:pointer; padding:15px; background:#fff; border-radius:8px; border:1px solid #ddd;">
-          <input type="radio" name="consent" value="yes" style="transform:scale(1.5); margin-right:10px;"> 
+          <input type="radio" name="consent" value="yes" style="transform:scale(1.5); margin-right:10px;">
           <strong>はい</strong>（研究や精度向上にデータを使ってもよいです。）
         </label>
         <label style="display:block; cursor:pointer; padding:15px; background:#fff; border-radius:8px; border:1px solid #ddd;">
-          <input type="radio" name="consent" value="no" style="transform:scale(1.5); margin-right:10px;"> 
+          <input type="radio" name="consent" value="no" style="transform:scale(1.5); margin-right:10px;">
           <strong>いいえ</strong>（データを使ってほしくないです）
         </label>
       </div>
       <p id="error1" class="error-msg">※「はい」または「いいえ」を選択してください</p>
-      
+
       <div class="controls">
         <button type="button" class="back-btn" id="btn-back-to-home">戻る</button>
         <button type="button" id="btn-go-to-2">次へ</button>
@@ -145,7 +164,7 @@
       <p style="color:#666; margin-bottom:30px;">以下を入力して「質問回答へ」進んでください。</p>
 
       <div style="margin-bottom:20px;">性別：<br><select name="gender" id="inp-gender"><option value="">選択してください</option><option value="男性">男性</option><option value="女性">女性</option><option value="その他">その他</option></select></div>
-      
+
       <div style="margin-bottom:20px;">年齢：<br>
         <div class="number-control-group">
           <button type="button" class="num-btn" onclick="changeVal('inp-age', -1)">−</button>
@@ -154,13 +173,13 @@
           <span>歳</span>
         </div>
       </div>
-      
+
       <div style="margin-bottom:20px;">取得学位：<br><select name="degree" id="inp-degree">
         <option value="">選択してください</option><option value="短期大学士">短期大学士</option>
         <option value="専門士">専門士/高度専門士</option><option value="学士">学士</option>
         <option value="修士">修士</option><option value="博士">博士</option><option value="その他">その他</option>
       </select></div>
-      
+
       <div style="margin-bottom:20px;">国家資格取得後の年数：<br>
         <div class="number-control-group">
           <button type="button" class="num-btn" onclick="changeVal('inp-years', -1)">−</button>
@@ -169,12 +188,19 @@
           <span>年目</span>
         </div>
       </div>
-      
+
       <div style="margin-bottom:20px;">主な専門領域：<br><select name="specialty" id="inp-specialty">
         <option value="">選択してください</option><option value="身体障害">身体障害</option><option value="精神障害">精神障害</option>
         <option value="発達障害">発達障害</option><option value="老年期障害">老年期障害</option><option value="その他">その他</option>
       </select></div>
-      
+
+      <div style="margin-bottom:20px;">OOOsチェックを行うのは今回が初めてですか？<br><select name="oooExperience" id="inp-ooo-experience">
+        <option value="">選択してください</option>
+        <option value="first">はい、初めてです</option>
+        <option value="repeat">いいえ、以前にも行ったことがあります</option>
+        <option value="unknown">わからない／覚えていない</option>
+      </select></div>
+
       <p id="error2" class="error-msg">※すべての項目を入力してください</p>
       <div class="controls"><button type="button" class="back-btn" id="btn-back-to-1">戻る</button><button type="button" id="btn-go-to-3">質問回答へ</button></div>
     </div>
@@ -195,58 +221,65 @@
       </div>
 
       <div id="questions-area"></div>
-      
+
       <p id="error3" class="error-msg">※未回答の項目があります。すべての質問にお答えください。</p>
       <div class="controls"><button type="button" class="back-btn" id="btn-back-to-2">戻る</button><button type="submit" id="submitBtn">結果を見る</button></div>
     </div>
   </form>
 
 <script>
-  // 質問データ
+  // 質問データ。cat: CHECK は注意確認項目として採点から除外します。
+  const scoredQuestions = [
+    { id: 1, cat: "OFP", text: "クライエントにとって意味のある作業を特定できる。" },
+    { id: 2, cat: "OBP", text: "クライエントの作業に関する課題を解決するために、作業の難易度を段階づけることができる。" },
+    { id: 3, cat: "OCP", text: "クライエントの作業に影響する環境要因（道具・空間・人的支援など）を把握できる。" },
+    { id: 4, cat: "OFP", text: "クライエントの現在の作業に関する課題を明確にすることができる。" },
+    { id: 5, cat: "OBP", text: "クライエントに合う作業を見つけるため、実際の作業を体験する機会を提供できる。" },
+    { id: 6, cat: "OFP", text: "クライエントと協働し、作業に関する目標を設定できる。" },
+    { id: 7, cat: "OCP", text: "クライエントの健康・幸福のために、作業がなぜ必要か説明できる。" },
+    { id: 8, cat: "OFP", text: "クライエントの作業に対する主観的な経験（重要度、実行度など）を評価できる。" },
+    { id: 9, cat: "OBP", text: "クライエントが実際に行う作業を観察し、人・環境・作業の相互関係を分析できる。" },
+    { id: 10, cat: "OCP", text: "クライエントにとっての作業の意味や価値がなぜ重要か説明できる。" },
+    { id: 11, cat: "OFP", text: "クライエントの作業に関する課題と、役割や習慣の関係を評価し、介入計画を立案できる。" },
+    { id: 12, cat: "OBP", text: "クライエントが実際に行う作業の質（努力性・効率性・安全性・自立性）を観察評価できる。" },
+    { id: 13, cat: "OCP", text: "クライエントの作業を、過去・現在・未来という時系列のつながりとして捉えることができる。" },
+    { id: 14, cat: "OFP", text: "クライエントの作業に関する目標の達成度を継続的に評価することができる。" },
+    { id: 15, cat: "OBP", text: "クライエントが実際の作業を行う過程で、手本・介助・助言や問いかけを使い分け、最適な方法の習得を支援できる。" },
+    { id: 16, cat: "OCP", text: "クライエントが直面する課題を、身体機能や精神機能だけでなく、作業との関連で捉えることができる。" },
+    { id: 17, cat: "OFP", text: "クライエントに作業の意味や価値への気づきを促すことができる。" },
+    { id: 18, cat: "OBP", text: "クライエントが作業を通して、自分らしく生きているという実感がもてるよう支援できる。" },
+    { id: 19, cat: "OCP", text: "クライエントの作業が、所属する集団の慣習や社会的背景の影響を受けることを理解できる。" },
+    { id: 20, cat: "OFP", text: "クライエントの作業への参加のため、周囲の理解を促し、支援的な環境を整えるよう働きかけることができる。" },
+    { id: 21, cat: "OBP", text: "クライエントが役割や居場所を得られるよう、実際の作業を用いて支援できる。" },
+    { id: 22, cat: "OCP", text: "クライエントが生きるうえで、作業がなぜ必要か説明できる。" },
+    { id: 23, cat: "OBP", text: "クライエントの課題解決のため、なじみのある生活環境（自宅・地域など）で作業を用いた介入ができる。" },
+    { id: 24, cat: "OBP", text: "クライエントのなじみのある生活環境（自宅・地域など）で介入が困難な場合、類似した模擬的な環境で作業を用いた介入ができる。" },
+    { id: 25, cat: "OCP", text: "クライエントの作業に関する課題に対して、状況に応じた多様な専門的推論（リーズニング）を使い分けることができる。" }
+  ];
+  const attentionQuestion = { id: 26, cat: "CHECK", text: "この項目は、必ず「6. できる」を選んでください。これは回答の注意を確認するための設問です。" };
+  const minAttentionDisplayNo = 10;
+  const maxAttentionDisplayNo = 20;
+  const attentionInsertIndex =
+    Math.floor(Math.random() * (maxAttentionDisplayNo - minAttentionDisplayNo + 1)) + (minAttentionDisplayNo - 1);
+  const attentionCheckDisplayNo = attentionInsertIndex + 1;
   const oooQuestions = [
-    { id: 1, cat: "OCP", text: "クライエントが生きるうえで、作業がなぜ必要か説明できる" },
-    { id: 2, cat: "OCP", text: "クライエントの健康・幸福のために、作業がなぜ必要か説明できる" },
-    { id: 3, cat: "OCP", text: "クライエントにとっての作業の意味や価値の重要性を解釈できる" },
-    { id: 4, cat: "OCP", text: "クライエントの作業に関する物理的・社会的環境の側面を認識できる" },
-    { id: 5, cat: "OCP", text: "クライエントの作業が、文化的背景や社会的規範によってどのように形作られているか理解できる" },
-    { id: 6, cat: "OCP", text: "クライエントの作業の過去・現在・未来の連続性を解釈できる" },
-    { id: 7, cat: "OCP", text: "クライエントの作業に関する課題に対し、作業の視点を主軸に据え、多様なリーズニングを使い分けて方針を決定できる" },
-    { id: 8, cat: "OCP", text: "クライエントが直面する課題を、身体機能や精神機能だけでなく、作業との関連で捉えることができる" },
-    { id: 9, cat: "OFP", text: "クライエントにとって意味のある作業を特定できる" },
-    { id: 10, cat: "OFP", text: "クライエントの作業に対する主観的な経験（重要度、実行度など）を評価できる" },
-    { id: 11, cat: "OFP", text: "クライエントの現在の役割や習慣が作業に与える影響を評価し、介入計画を立案できる" },
-    { id: 12, cat: "OFP", text: "クライエントの現在の作業に関する課題を明確にすることができる" },
-    { id: 13, cat: "OFP", text: "クライエントと協働し、作業に関する目標を設定できる" },
-    { id: 14, cat: "OFP", text: "クライエントの作業に関する目標に対し、達成度を継続的に評価することができる" },
-    { id: 15, cat: "OFP", text: "クライエントに作業の意味や価値への気づきを促すことができる" },
-    { id: 16, cat: "OFP", text: "クライエントの作業への参加を促進するため、周囲の理解を深め、支援的な環境を整えることができる" },
-    { id: 17, cat: "OBP", text: "クライエントが実際に行う作業の質を、観察評価できる" },
-    { id: 18, cat: "OBP", text: "クライエントが実際に行う作業を観察し、人・環境・作業の相互関係を分析できる" },
-    { id: 19, cat: "OBP", text: "クライエントに合う作業を見つけるため、実際の作業を試すことができる" },
-    { id: 20, cat: "OBP", text: "クライエントの作業に関する課題を解決するために、作業の難易度を段階づけることができる" },
-    { id: 21, cat: "OBP", text: "クライエントが実際の作業を行う過程で、手本・介助・助言や問いかけを使い分け、最適なやり方の習得を支援できる" },
-    { id: 22, cat: "OBP", text: "クライエントが実際に作業に取り組むことを通して、自己認識（アイデンティティや成長の実感）の構築を支援できる" },
-    { id: 23, cat: "OBP", text: "クライエントが居場所を手にいれるため、実際に作業に取り組むことを通して支援できる" },
-    { id: 24, cat: "OBP", text: "クライエントの課題解決のために、なじみのある実際の生活環境で直接作業を用いた介入ができる" },
-    { id: 25, cat: "OBP", text: "クライエントのなじみのある生活環境で介入が困難な場合、可能な限り類似した環境で直接作業を用いた介入ができる" }
+    ...scoredQuestions.slice(0, attentionInsertIndex),
+    attentionQuestion,
+    ...scoredQuestions.slice(attentionInsertIndex)
   ];
 
-  // 質問画面生成
   const qArea = document.getElementById('questions-area');
-  let lastCat = "";
-  oooQuestions.forEach(q => {
-    if(q.cat !== lastCat){
-      const h3 = document.createElement('h3');
-      h3.innerText = q.cat === "OCP" ? "作業中心実践 (OCP)" : (q.cat === "OFP" ? "作業焦点実践 (OFP)" : "作業基盤実践 (OBP)");
-      qArea.appendChild(h3);
-      lastCat = q.cat;
-    }
+  oooQuestions.forEach((q, index) => {
     const div = document.createElement('div');
     div.className = 'question';
+    const catLabel = q.cat === "CHECK" ? "確認" : q.cat;
+    const displayNo = index + 1;
     div.innerHTML = `
-      <label class="q-label">【${q.id}】 ${q.text}</label>
+      <label class="q-label">
+        【${displayNo}】 <span class="cat-badge cat-${q.cat.toLowerCase()}">${catLabel}</span>${q.text}
+      </label>
       <div class="option-group">
-        ${[1,2,3,4,5,6].map(v => 
+        ${[1,2,3,4,5,6].map(v =>
           `<div class="option-item">
              <label>
                <input type="radio" name="q${q.id}" value="${v}" required onchange="updateProgress()"><br>
@@ -258,44 +291,43 @@
     qArea.appendChild(div);
   });
 
-  // プログレスバー更新
   window.updateProgress = function() {
     const answered = document.querySelectorAll('#questions-area input:checked').length;
-    const total = 25;
-    const percent = (answered / total) * 100;
+    const percent = (answered / oooQuestions.length) * 100;
     document.getElementById('progress-bar').style.width = percent + "%";
   }
 
-  // 数値入力の＋−ボタン制御
+  window.addEventListener('pageshow', function() {
+    document.querySelectorAll('#questions-area input[type="radio"]').forEach(input => {
+      input.checked = false;
+    });
+    updateProgress();
+  });
+
   window.changeVal = function(id, amount) {
     const input = document.getElementById(id);
     let val = parseInt(input.value);
-    
-    // 空欄の場合はプレースホルダーの値(30や10)を基準にする
+
     if (isNaN(val)) {
       val = parseInt(input.placeholder) || 0;
-      // 最初のクリックで値をセットするだけにするならここで input.value = val; return; でもよいが、
-      // ここでは「基準値 + 増減」していきなり動くようにする
     }
 
     let newVal = val + amount;
     if (input.min && newVal < parseInt(input.min)) newVal = parseInt(input.min);
     if (input.max && newVal > parseInt(input.max)) newVal = parseInt(input.max);
-    
+
     input.value = newVal;
   }
 
-  // 画面遷移
   const step1 = document.getElementById('step1');
   const step2 = document.getElementById('step2');
   const step3 = document.getElementById('step3');
-  
-  //  Step1 -> ホームページへ戻る (Netlifyの正しいURLへ変更)
+  let questionStartedAt = null;
+
   document.getElementById('btn-back-to-home').addEventListener('click', function() {
     window.location.href = 'https://ooos-toppage.netlify.app/';
   });
 
-  // Step1 -> Step2
   document.getElementById('btn-go-to-2').addEventListener('click', function() {
     if (!document.querySelector('input[name="consent"]:checked')) {
       document.getElementById('error1').style.display = 'block'; alert("選択してください"); return;
@@ -304,18 +336,15 @@
     step1.classList.remove('active'); step2.classList.add('active'); window.scrollTo(0,0);
   });
 
-  // Step2 -> Step1
   document.getElementById('btn-back-to-1').addEventListener('click', function() {
     step2.classList.remove('active'); step1.classList.add('active'); window.scrollTo(0,0);
   });
 
-  // Step2 -> Step3
   document.getElementById('btn-go-to-3').addEventListener('click', function() {
-    const ids = ['inp-gender','inp-age','inp-degree','inp-years','inp-specialty'];
+    const ids = ['inp-gender','inp-age','inp-degree','inp-years','inp-specialty','inp-ooo-experience'];
     let ok = true;
     ids.forEach(id => {
       const el = document.getElementById(id);
-      // 既存エラー表示をリセット
       el.classList.remove('input-error');
       const existingMsg = el.parentElement.querySelector('.input-error-label');
       if (existingMsg) existingMsg.remove();
@@ -325,63 +354,122 @@
         el.classList.add('input-error');
         const msg = document.createElement('span');
         msg.className = 'input-error-label';
-        msg.textContent = '⚠ 入力してください';
+        msg.textContent = '入力してください';
         el.parentElement.appendChild(msg);
       }
     });
-    
+
     if (!ok) {
       document.getElementById('error2').style.display = 'block';
-      // 最初のエラー箇所までスクロール
       const firstError = document.querySelector('#step2 .input-error');
       if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
     document.getElementById('error2').style.display = 'none';
+    if (!questionStartedAt) questionStartedAt = Date.now();
     step2.classList.remove('active'); step3.classList.add('active'); window.scrollTo(0,0);
   });
 
-  // Step3 -> Step2
   document.getElementById('btn-back-to-2').addEventListener('click', function() {
     step3.classList.remove('active'); step2.classList.add('active'); window.scrollTo(0,0);
   });
 
-  // 送信
   document.getElementById('ooo-form').addEventListener('submit', async function(e) {
     e.preventDefault();
     const formData = new FormData(document.getElementById('ooo-form'));
     const data = Object.fromEntries(formData.entries());
-    let allAnswered = true;
-    for(let i=1; i<=25; i++) { if(!data["q"+i]) allAnswered = false; }
+    const allAnswered = oooQuestions.every(q => data[`q${q.id}`]);
 
     if(!allAnswered) {
       document.getElementById('error3').style.display = 'block'; alert("未回答の項目があります。"); return;
     }
 
+    const orderedResponses = {};
+    for (let i = 1; i <= oooQuestions.length; i++) {
+      orderedResponses[`q${i}`] = data[`q${i}`];
+    }
+
     const btn = document.getElementById('submitBtn');
     btn.disabled = true; btn.innerText = "送信中...";
 
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxhbR8pr3oiqYcyUAmU29ST7ffeHlc1JuzTUSY6WptS3eLlU7JRXitSW70jaBobOBb8tg/exec";
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzGUrcy1N6Ljn-8FZbCfYEm9uyazGtxYXUVsM-B486papg2AZrlFtBQHZRykW0oZ5sT9w/exec";
 
     let ocp=0, ofp=0, obp=0;
     oooQuestions.forEach(q => {
+      if (q.cat === "CHECK") return;
+
       const v = Number(data[`q${q.id}`]);
-      if(q.cat==="OCP") ocp+=v; else if(q.cat==="OFP") ofp+=v; else obp+=v;
+      if(q.cat==="OCP") ocp+=v; else if(q.cat==="OFP") ofp+=v; else if(q.cat==="OBP") obp+=v;
     });
 
+    const scoredValues = oooQuestions
+      .filter(q => q.cat !== "CHECK")
+      .map(q => Number(data[`q${q.id}`]));
+    const responseMean = scoredValues.reduce((sum, value) => sum + value, 0) / scoredValues.length;
+    const responseVariance = scoredValues.reduce((sum, value) => sum + Math.pow(value - responseMean, 2), 0) / scoredValues.length;
+    const responseStdDev = Math.sqrt(responseVariance);
+    const completionSeconds = questionStartedAt ? Math.round((Date.now() - questionStartedAt) / 1000) : null;
+    const age = Number(data.age);
+    const yearsLicensed = Number(data.yearsLicensed);
+    const flagAttentionCheckFailed = Number(data.q26) !== 6;
+    const flagTooFast = completionSeconds !== null && completionSeconds < 90;
+    const flagStraightLining = new Set(scoredValues).size === 1;
+    const flagLowVariance = responseStdDev < 0.5;
+    const flagProfileInconsistent =
+      !Number.isFinite(age) ||
+      !Number.isFinite(yearsLicensed) ||
+      age < 18 ||
+      age > 100 ||
+      yearsLicensed < 0 ||
+      yearsLicensed > Math.max(age - 18, 0);
+    const flagMissingResponse = !allAnswered;
+    const qualityFlags = {
+      flag_attention_check_failed: flagAttentionCheckFailed,
+      flag_missing_response: flagMissingResponse,
+      flag_too_fast: flagTooFast,
+      flag_straight_lining: flagStraightLining,
+      flag_low_variance: flagLowVariance,
+      flag_profile_inconsistent: flagProfileInconsistent
+    };
+    const qualityFlagNames = Object.entries(qualityFlags)
+      .filter(([, value]) => value)
+      .map(([key]) => key);
+    const qualityCheckPassed = qualityFlagNames.length === 0;
+    const modelUseCandidate = data.consent === 'yes' && data.oooExperience === 'first' && qualityCheckPassed;
+
     const payload = {
+      survey_version: "2026-05-02-reordered-25-plus-attention",
       consent: data.consent === 'yes',
+      ooo_experience: data.oooExperience,
+      is_first_ooo: data.oooExperience === 'first',
       gender: data.gender,
-      age: Number(data.age),
+      age: age,
       degree: data.degree,
-      years_licensed: Number(data.yearsLicensed),
+      years_licensed: yearsLicensed,
       specialty: data.specialty,
-      ocp_score: ocp, ofp_score: ofp, obp_score: obp, total_score: ocp+ofp+obp,
-      responses: data
+      ocp_score: ocp,
+      ofp_score: ofp,
+      obp_score: obp,
+      total_score: ocp+ofp+obp,
+      attention_check_q26: Number(data.q26),
+      attention_check_display_no: attentionCheckDisplayNo,
+      completion_seconds: completionSeconds,
+      response_std_dev: Number(responseStdDev.toFixed(3)),
+      ...qualityFlags,
+      quality_flags_count: qualityFlagNames.length,
+      quality_flags: qualityFlagNames.join(','),
+      quality_check_passed: qualityCheckPassed,
+      model_use_candidate: modelUseCandidate,
+      responses: orderedResponses
     };
 
     try {
-      await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
+      await fetch(GAS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
       sessionStorage.setItem('ooo_result', JSON.stringify(payload));
       window.location.href = 'result.html';
     } catch(err) {

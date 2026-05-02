@@ -26,7 +26,8 @@
 
     h2 { border-bottom: 2px solid #26466d; padding-bottom: 10px; margin-bottom: 20px; color: #26466d; font-size: 1.4em; }
 
-    .question { margin: 2.5em 0; padding-bottom: 2em; border-bottom: 1px dashed #ccc; }
+    .question { margin: 2.5em 0; padding-bottom: 2em; border-bottom: 1px dashed #ccc; scroll-margin-top: 190px; }
+    .question.unanswered { background: #fffafa; border: 2px solid #d9534f; border-radius: 8px; padding: 18px; }
     .q-label { font-weight: bold; display: block; margin-bottom: 1.2em; font-size: 1.1em; }
     .cat-badge {
       display: inline-flex;
@@ -50,11 +51,13 @@
     .option-group { display: flex; justify-content: space-between; gap: 5px; }
     .option-item { flex: 1; text-align: center; }
     .option-item label {
-      display: block; padding: 15px 5px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; min-height: 54px; padding: 10px 5px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+      touch-action: manipulation; user-select: none; -webkit-user-select: none;
     }
     .option-item label:hover { background-color: #e2e6ea; border-color: #adb5bd; }
     .option-item:has(input:checked) label { background-color: #26466d; color: white; border-color: #26466d; }
-    .option-item input[type="radio"] { transform: scale(1.5); margin-bottom: 5px; }
+    .option-item input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+    .option-item span { font-size: 1.25em; font-weight: bold; line-height: 1; }
 
     /* コントロールボタン */
     .controls { text-align: center; margin-top: 3em; }
@@ -116,8 +119,7 @@
       .step-section { padding: 22px; }
       .option-group { flex-wrap: nowrap; gap: 3px; }
       .option-item { flex: 1; min-width: 0; }
-      .option-item label { padding: 12px 2px; font-size: 0.95em; }
-      .option-item input[type="radio"] { transform: scale(1.2); }
+      .option-item label { min-height: 48px; padding: 8px 2px; font-size: 0.95em; }
       .sticky-legend { padding: 10px; margin: -22px -22px 20px -22px; }
       .legend-content { max-height: 150px; }
       button { width: 100%; margin: 8px 0; }
@@ -272,6 +274,7 @@
   oooQuestions.forEach((q, index) => {
     const div = document.createElement('div');
     div.className = 'question';
+    div.dataset.questionId = q.id;
     const catLabel = q.cat === "CHECK" ? "確認" : q.cat;
     const displayNo = index + 1;
     div.innerHTML = `
@@ -282,7 +285,7 @@
         ${[1,2,3,4,5,6].map(v =>
           `<div class="option-item">
              <label>
-               <input type="radio" name="q${q.id}" value="${v}" required onchange="updateProgress()"><br>
+               <input type="radio" name="q${q.id}" value="${v}" required onchange="updateProgress()">
                <span>${v}</span>
              </label>
            </div>`
@@ -295,6 +298,11 @@
     const answered = document.querySelectorAll('#questions-area input:checked').length;
     const percent = (answered / oooQuestions.length) * 100;
     document.getElementById('progress-bar').style.width = percent + "%";
+    document.querySelectorAll('#questions-area .question.unanswered').forEach(question => {
+      if (question.querySelector('input[type="radio"]:checked')) {
+        question.classList.remove('unanswered');
+      }
+    });
   }
 
   window.addEventListener('pageshow', function() {
@@ -381,8 +389,23 @@
     const allAnswered = oooQuestions.every(q => data[`q${q.id}`]);
 
     if(!allAnswered) {
-      document.getElementById('error3').style.display = 'block'; alert("未回答の項目があります。"); return;
+      document.getElementById('error3').style.display = 'block';
+      document.querySelectorAll('#questions-area .question.unanswered').forEach(question => {
+        question.classList.remove('unanswered');
+      });
+
+      const firstUnanswered = oooQuestions
+        .map(q => document.querySelector(`#questions-area .question[data-question-id="${q.id}"]`))
+        .find(question => question && !question.querySelector('input[type="radio"]:checked'));
+
+      if (firstUnanswered) {
+        firstUnanswered.classList.add('unanswered');
+        firstUnanswered.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      alert("未回答の項目があります。該当箇所へ移動します。");
+      return;
     }
+    document.getElementById('error3').style.display = 'none';
 
     const orderedResponses = {};
     for (let i = 1; i <= oooQuestions.length; i++) {

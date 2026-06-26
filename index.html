@@ -229,6 +229,7 @@
     </div>
   </form>
 
+<script src="lrt-estimator.js"></script>
 <script>
   // 質問データ。cat: CHECK は注意確認項目として採点から除外します。
   const scoredQuestions = [
@@ -259,11 +260,8 @@
     { id: 25, cat: "OCP", text: "クライエントの作業に関する課題に対して、状況に応じた多様な専門的推論（リーズニング）を使い分けることができる。" }
   ];
   const attentionQuestion = { id: 26, cat: "CHECK", text: "この項目は、必ず「6. できる」を選んでください。これは回答の注意を確認するための設問です。" };
-  const minAttentionDisplayNo = 10;
-  const maxAttentionDisplayNo = 20;
-  const attentionInsertIndex =
-    Math.floor(Math.random() * (maxAttentionDisplayNo - minAttentionDisplayNo + 1)) + (minAttentionDisplayNo - 1);
-  const attentionCheckDisplayNo = attentionInsertIndex + 1;
+  const attentionCheckDisplayNo = 16;
+  const attentionInsertIndex = attentionCheckDisplayNo - 1;
   const oooQuestions = [
     ...scoredQuestions.slice(0, attentionInsertIndex),
     attentionQuestion,
@@ -408,9 +406,10 @@
     document.getElementById('error3').style.display = 'none';
 
     const orderedResponses = {};
-    for (let i = 1; i <= oooQuestions.length; i++) {
-      orderedResponses[`q${i}`] = data[`q${i}`];
+    for (let i = 1; i <= scoredQuestions.length; i++) {
+      orderedResponses[`q${i}`] = Number(data[`q${i}`]);
     }
+    orderedResponses.q26 = Number(data.q26);
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true; btn.innerText = "送信中...";
@@ -459,6 +458,15 @@
       .map(([key]) => key);
     const qualityCheckPassed = qualityFlagNames.length === 0;
     const modelUseCandidate = data.consent === 'yes' && data.oooExperience === 'first' && qualityCheckPassed;
+    let latentRankResult = null;
+
+    try {
+      latentRankResult = await window.OOOS_LRT.estimate(orderedResponses);
+    } catch (error) {
+      alert("潜在ランク推定モデルを読み込めませんでした。通信環境を確認して、もう一度お試しください。");
+      btn.disabled = false; btn.innerText = "結果を見る";
+      return;
+    }
 
     const payload = {
       survey_version: "2026-05-02-reordered-25-plus-attention",
@@ -483,6 +491,13 @@
       quality_flags: qualityFlagNames.join(','),
       quality_check_passed: qualityCheckPassed,
       model_use_candidate: modelUseCandidate,
+      lrt_model_version: latentRankResult.model_version,
+      latent_rank: latentRankResult.latent_rank,
+      rank_membership_rank1: latentRankResult.rank_membership_rank1,
+      rank_membership_rank2: latentRankResult.rank_membership_rank2,
+      rank_membership_rank3: latentRankResult.rank_membership_rank3,
+      rank_membership_rank4: latentRankResult.rank_membership_rank4,
+      rank_membership_profile: latentRankResult.rank_membership_profile,
       responses: orderedResponses
     };
 

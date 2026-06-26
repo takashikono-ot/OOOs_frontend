@@ -40,6 +40,11 @@
     /* ランク判定ボックス */
     .rank-box { background: #fff8e1; border: 3px dashed #ffa000; padding: 20px; margin: 30px 0; border-radius: 10px; }
     .rank-title { font-weight: bold; display: block; margin-bottom: 10px; font-size: 1.1em; }
+    .rank-value { font-size: 2em; color: #e67e22; font-weight: bold; margin: 8px 0 14px; }
+    .membership-profile { display: grid; gap: 10px; margin-top: 14px; text-align: left; }
+    .membership-row { display: grid; grid-template-columns: 72px 1fr 58px; gap: 10px; align-items: center; font-size: 0.9em; }
+    .membership-bar { height: 12px; background: #f0e1bd; border-radius: 999px; overflow: hidden; }
+    .membership-fill { height: 100%; background: #26466d; border-radius: 999px; min-width: 2px; }
 
     .quality-note { color: #777; font-size: 0.85em; margin-top: 12px; }
     .btn { display: inline-block; background: #26466d; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; transition: 0.3s; font-weight: bold; margin-top: 20px; }
@@ -75,10 +80,8 @@
 
   <div class="rank-box">
     <span class="rank-title">あなたの潜在ランク判定</span>
-    <span style="font-size: 1.8em; color: #e67e22; font-weight:bold;">いま構築中</span>
-    <p style="font-size: 0.85em; color: #666; margin-top: 10px;">
-      ※現在、多くのデータを集めて推定ロジックを作成しています。
-    </p>
+    <div class="rank-value" id="latentRankValue">Rank -</div>
+    <div class="membership-profile" id="membershipProfile"></div>
   </div>
 
   <h2>あなたの回答一覧</h2>
@@ -99,6 +102,7 @@
   <a href="index.html" class="btn">トップへ戻る</a>
 </div>
 
+<script src="lrt-estimator.js"></script>
 <script>
   const res = JSON.parse(sessionStorage.getItem('ooo_result'));
 
@@ -111,6 +115,48 @@
   document.getElementById('ocpVal').innerText = res.ocp_score;
   document.getElementById('ofpVal').innerText = res.ofp_score;
   document.getElementById('obpVal').innerText = res.obp_score;
+
+  function getMembershipValues(result) {
+    if (Array.isArray(result.rank_membership)) {
+      return result.rank_membership.map(Number);
+    }
+    return [
+      result.rank_membership_rank1,
+      result.rank_membership_rank2,
+      result.rank_membership_rank3,
+      result.rank_membership_rank4
+    ].map(Number);
+  }
+
+  function renderLatentRank(result) {
+    const rank = Number(result.latent_rank);
+    const membership = getMembershipValues(result);
+    document.getElementById('latentRankValue').innerText = Number.isFinite(rank)
+      ? `Rank ${rank}`
+      : 'Rank -';
+
+    const profile = document.getElementById('membershipProfile');
+    profile.innerHTML = '';
+    membership.forEach((value, index) => {
+      const percent = Number.isFinite(value) ? value * 100 : 0;
+      const row = document.createElement('div');
+      row.className = 'membership-row';
+      row.innerHTML = `
+        <span>Rank ${index + 1}</span>
+        <span class="membership-bar"><span class="membership-fill" style="width:${Math.max(0, Math.min(100, percent))}%"></span></span>
+        <strong>${percent.toFixed(1)}%</strong>
+      `;
+      profile.appendChild(row);
+    });
+  }
+
+  if (res.latent_rank) {
+    renderLatentRank(res);
+  } else if (window.OOOS_LRT && res.responses) {
+    window.OOOS_LRT.estimate(res.responses).then(renderLatentRank).catch(() => {
+      document.getElementById('latentRankValue').innerText = 'Rank -';
+    });
+  }
 
   const ocpRate = (res.ocp_score / 48) * 100;
   const ofpRate = (res.ofp_score / 48) * 100;

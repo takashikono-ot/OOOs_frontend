@@ -37,14 +37,19 @@
     .ans-cat { text-align: center; width: 60px; font-weight: bold; color: #26466d; }
     .ans-val { font-weight: bold; font-size: 1.1em; text-align: center; width: 60px; }
 
-    /* ランク判定ボックス */
-    .rank-box { background: #fff8e1; border: 3px dashed #ffa000; padding: 20px; margin: 30px 0; border-radius: 10px; }
-    .rank-title { font-weight: bold; display: block; margin-bottom: 10px; font-size: 1.1em; }
-    .rank-value { font-size: 2em; color: #e67e22; font-weight: bold; margin: 8px 0 14px; }
+    /* 結果解釈エリア */
+    .first-section { margin-top: 10px; }
+    .result-section { margin: 30px 0; text-align: left; }
+    .rank-value { font-size: 1.8em; color: #e67e22; font-weight: bold; margin: 8px 0 14px; text-align: center; }
+    .pattern-summary { color: #26466d; font-weight: bold; margin: 0 0 14px; }
     .membership-profile { display: grid; gap: 10px; margin-top: 14px; text-align: left; }
-    .membership-row { display: grid; grid-template-columns: 72px 1fr 58px; gap: 10px; align-items: center; font-size: 0.9em; }
-    .membership-bar { height: 12px; background: #f0e1bd; border-radius: 999px; overflow: hidden; }
-    .membership-fill { height: 100%; background: #26466d; border-radius: 999px; min-width: 2px; }
+    .membership-row { display: grid; grid-template-columns: 78px minmax(0, 1fr) 64px; gap: 10px; align-items: center; font-size: 0.9em; }
+    .membership-bar { display: block; width: 100%; height: 12px; background: #f0e1bd; border-radius: 999px; overflow: hidden; }
+    .membership-fill { display: block; height: 100%; background: #26466d; border-radius: 999px; }
+    .result-interpretation { margin-top: 18px; line-height: 1.8; }
+    .result-interpretation p { margin: 0 0 8px; }
+    .result-notes { margin-top: 16px; color: #555; font-size: 0.86em; line-height: 1.7; }
+    .result-notes p { margin: 4px 0; }
 
     .quality-note { color: #777; font-size: 0.85em; margin-top: 12px; }
     .btn { display: inline-block; background: #26466d; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; transition: 0.3s; font-weight: bold; margin-top: 20px; }
@@ -63,9 +68,11 @@
 <div class="card">
   <h1>OOOsの結果</h1>
 
+  <h2 class="first-section">総合結果</h2>
+
   <div class="score-container">
     <div class="total-score">
-      合計得点: <span class="total-val" id="totalScore">0</span> <span style="font-size:0.7em; color:#888;">/ 150</span>
+      合計得点：<span class="total-val" id="totalScore">0</span> <span style="font-size:0.7em; color:#888;">/ 150</span>
     </div>
     <div class="sub-scores">
       <div class="sub-item"><strong>OCP</strong><span id="ocpVal">0</span> / 48</div>
@@ -78,10 +85,20 @@
     <canvas id="oooChart"></canvas>
   </div>
 
-  <div class="rank-box">
-    <span class="rank-title">あなたの潜在ランク判定</span>
-    <div class="rank-value" id="latentRankValue">Rank -</div>
+  <div class="result-section">
+    <h2>総得点ベースの目安</h2>
+    <div class="rank-value" id="totalScoreRankValue">Rank -相当</div>
+  </div>
+
+  <div class="result-section">
+    <h2>回答パターンの類似性（参考）</h2>
+    <p class="pattern-summary" id="patternRankSummary">回答パターン上もっとも近いRank：Rank -</p>
     <div class="membership-profile" id="membershipProfile"></div>
+    <div class="result-interpretation" id="resultInterpretation"></div>
+    <div class="result-notes">
+      <p>※回答パターンの類似性は、合計得点だけでなく、各項目の回答の組み合わせも考慮して算出されています。</p>
+      <p>※現時点の潜在ランク推定は、検証用サンプルサイズが十分とは言えないため、暫定的な参考情報です。能力判定や処遇判断には用いず、自己省察の手がかりとして確認してください。</p>
+    </div>
   </div>
 
   <h2>あなたの回答一覧</h2>
@@ -116,9 +133,27 @@
   document.getElementById('ofpVal').innerText = res.ofp_score;
   document.getElementById('obpVal').innerText = res.obp_score;
 
+  const RANK_LEVEL_LABELS = {
+    1: '低めの水準',
+    2: 'やや低めから中程度の水準',
+    3: '中程度以上の水準',
+    4: '高い水準'
+  };
+
+  const RANK_TENDENCY_TEXTS = {
+    1: 'OOOs全体として、自己認識にはまだ伸びしろがある傾向が示されています。',
+    2: 'OOOs全体として、自己認識は形成途上にある傾向が示されています。',
+    3: 'OOOs全体として、一定の自己認識傾向が示されています。',
+    4: 'OOOs全体として、高い自己認識傾向が示されています。'
+  };
+
   function getMembershipValues(result) {
     if (Array.isArray(result.rank_membership)) {
       return result.rank_membership.map(Number);
+    }
+    if (typeof result.rank_membership_profile === 'string') {
+      const values = result.rank_membership_profile.split(',').map(Number);
+      if (values.length >= 4) return values.slice(0, 4);
     }
     return [
       result.rank_membership_rank1,
@@ -128,34 +163,131 @@
     ].map(Number);
   }
 
-  function renderLatentRank(result) {
-    const rank = Number(result.latent_rank);
-    const membership = getMembershipValues(result);
-    document.getElementById('latentRankValue').innerText = Number.isFinite(rank)
-      ? `Rank ${rank}`
-      : 'Rank -';
+  function normalizeRmpProbabilities(rmpProbabilities) {
+    const values = (rmpProbabilities || []).slice(0, 4).map((value) => {
+      const number = Number(value);
+      if (!Number.isFinite(number) || number < 0) return 0;
+      return number > 1 ? number / 100 : number;
+    });
 
+    while (values.length < 4) values.push(0);
+    return values;
+  }
+
+  function getTotalScoreRank(totalScore) {
+    const score = Number(totalScore);
+    if (!Number.isFinite(score)) return null;
+    if (score < 76.2345) return 1;
+    if (score < 88.7135) return 2;
+    if (score < 100.776) return 3;
+    return 4;
+  }
+
+  function getPatternRank(rmpProbabilities) {
+    const probabilities = normalizeRmpProbabilities(rmpProbabilities);
+    const total = probabilities.reduce((sum, value) => sum + value, 0);
+    if (total <= 0) return null;
+
+    const maxProbability = Math.max(...probabilities);
+    return probabilities.indexOf(maxProbability) + 1;
+  }
+
+  function getRankUncertainty(rmpProbabilities) {
+    const probabilities = normalizeRmpProbabilities(rmpProbabilities);
+    const total = probabilities.reduce((sum, value) => sum + value, 0);
+    if (total <= 0) {
+      return { isUncertain: true, maxProbability: 0, secondProbability: 0 };
+    }
+
+    const sorted = probabilities.slice().sort((a, b) => b - a);
+    const maxProbability = sorted[0];
+    const secondProbability = sorted[1] || 0;
+    return {
+      isUncertain: maxProbability < 0.6 || (maxProbability - secondProbability) < 0.15,
+      maxProbability,
+      secondProbability
+    };
+  }
+
+  function getResultInterpretation(totalScore, totalScoreRank, patternRank, rmpProbabilities) {
+    const score = Number(totalScore);
+    const scoreText = Number.isFinite(score) ? `${score}点` : '合計得点';
+    const levelLabel = RANK_LEVEL_LABELS[totalScoreRank] || '判定が難しい水準';
+    const paragraphs = [];
+
+    if (!totalScoreRank || !patternRank) {
+      paragraphs.push('回答パターンの類似性は、参考情報として確認してください。');
+    } else if (totalScoreRank === patternRank) {
+      paragraphs.push(`合計得点${scoreText}は${levelLabel}に位置します。`);
+      paragraphs.push(`また、回答パターンもRank ${patternRank}に最も近い結果でした。`);
+      paragraphs.push(`この結果から、${RANK_TENDENCY_TEXTS[totalScoreRank]}`);
+    } else if (patternRank < totalScoreRank) {
+      paragraphs.push(`合計得点${scoreText}は${levelLabel}に位置します。`);
+      paragraphs.push(`一方で、一部の項目に低得点が集中していたため、回答パターンとしてはRank ${patternRank}型に近い結果となりました。`);
+      paragraphs.push('これは、全体の得点水準と項目ごとのばらつきの両方を反映した参考結果です。');
+    } else {
+      paragraphs.push(`合計得点はRank ${totalScoreRank}相当ですが、一部の項目で高得点がまとまっているため、回答パターンとしてはRank ${patternRank}型に近い結果となりました。`);
+      paragraphs.push('これは、全体の得点水準と項目ごとのばらつきの両方を反映した参考結果です。');
+    }
+
+    if (getRankUncertainty(rmpProbabilities).isUncertain) {
+      paragraphs.push('なお、隣接するランクとの違いが明確ではないため、ランクは幅をもって解釈してください。');
+    }
+
+    return paragraphs;
+  }
+
+  function renderRankProbabilityBars(rmpProbabilities) {
+    const probabilities = normalizeRmpProbabilities(rmpProbabilities);
     const profile = document.getElementById('membershipProfile');
     profile.innerHTML = '';
-    membership.forEach((value, index) => {
-      const percent = Number.isFinite(value) ? value * 100 : 0;
+
+    probabilities.forEach((value, index) => {
+      const percent = Math.max(0, Math.min(100, value * 100));
       const row = document.createElement('div');
       row.className = 'membership-row';
       row.innerHTML = `
         <span>Rank ${index + 1}</span>
-        <span class="membership-bar"><span class="membership-fill" style="width:${Math.max(0, Math.min(100, percent))}%"></span></span>
+        <span class="membership-bar"><span class="membership-fill" style="width:${percent}%"></span></span>
         <strong>${percent.toFixed(1)}%</strong>
       `;
       profile.appendChild(row);
     });
   }
 
-  if (res.latent_rank) {
-    renderLatentRank(res);
-  } else if (window.OOOS_LRT && res.responses) {
-    window.OOOS_LRT.estimate(res.responses).then(renderLatentRank).catch(() => {
-      document.getElementById('latentRankValue').innerText = 'Rank -';
+  function renderRankResults(result) {
+    const membership = normalizeRmpProbabilities(getMembershipValues(result));
+    const totalScoreRank = getTotalScoreRank(res.total_score);
+    const patternRank = getPatternRank(membership);
+    const interpretation = getResultInterpretation(res.total_score, totalScoreRank, patternRank, membership);
+
+    document.getElementById('totalScoreRankValue').innerText = totalScoreRank
+      ? `Rank ${totalScoreRank}相当`
+      : 'Rank -相当';
+    document.getElementById('patternRankSummary').innerText = patternRank
+      ? `回答パターン上もっとも近いRank：Rank ${patternRank}`
+      : '回答パターン上もっとも近いRank：Rank -';
+
+    renderRankProbabilityBars(membership);
+
+    const interpretationElement = document.getElementById('resultInterpretation');
+    interpretationElement.innerHTML = '';
+    interpretation.forEach((text) => {
+      const paragraph = document.createElement('p');
+      paragraph.innerText = text;
+      interpretationElement.appendChild(paragraph);
     });
+  }
+
+  const savedMembership = getMembershipValues(res);
+  if (savedMembership.some((value) => Number.isFinite(value))) {
+    renderRankResults(res);
+  } else if (window.OOOS_LRT && res.responses) {
+    window.OOOS_LRT.estimate(res.responses).then(renderRankResults).catch(() => {
+      renderRankResults({ rank_membership: [] });
+    });
+  } else {
+    renderRankResults({ rank_membership: [] });
   }
 
   const ocpRate = (res.ocp_score / 48) * 100;

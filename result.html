@@ -51,7 +51,6 @@
     .result-notes { margin-top: 16px; color: #555; font-size: 0.86em; line-height: 1.7; }
     .result-notes p { margin: 4px 0; }
 
-    .quality-note { color: #777; font-size: 0.85em; margin-top: 12px; }
     .btn { display: inline-block; background: #26466d; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; transition: 0.3s; font-weight: bold; margin-top: 20px; }
     .btn:hover { background: #1e3755; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
 
@@ -113,8 +112,6 @@
     </thead>
     <tbody id="answer-list-body"></tbody>
   </table>
-
-  <p class="quality-note" id="quality-note"></p>
 
   <a href="index.html" class="btn">トップへ戻る</a>
 </div>
@@ -373,8 +370,6 @@
     tbody.appendChild(tr);
   });
 
-  document.getElementById('quality-note').innerText =
-    res.quality_check_passed ? '' : '※回答内容の確認が必要な項目があります。';
 </script>
 
 </body>
